@@ -1,12 +1,19 @@
 import express from 'express';
+import { env } from './config/env';
+import healthRouter from './routes/health';
+import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
+// Trust proxy
+app.set('trust proxy', env.TRUST_PROXY_HOPS);
+
 app.use(express.json());
 
-// Health check — the only endpoint in Phase 1
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
+// Routes
+app.use('/api', healthRouter);
+
+// Central error handler (must be last)
+app.use(errorHandler);
 
 export default app;

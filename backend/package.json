@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "test": "vitest run"
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "migrate": "ts-node -e \"const {runMigrations}=require('./src/db/migrate');const {Pool}=require('pg');const {env}=require('./src/config/env');const p=new Pool({connectionString:env.DATABASE_URL});runMigrations(p).then(()=>p.end()).catch(e=>{console.error(e.message);process.exit(1)})\"",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -26,6 +28,7 @@
     "@types/pg": "^8.11.10",
     "@types/supertest": "^6.0.2",
     "supertest": "^7.0.0",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
