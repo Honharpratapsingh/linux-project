@@ -71,6 +71,27 @@ Idempotent demo dataset generator. Creates 3 faculty members, 6 students, and 9 
 DEMO_SEED_PASSWORD="demo_seed_password_123" npm run seed:demo
 ```
 
+## Phase 3 — Frontend (Real Backend API)
+
+- **Stack**: React 18, Vite, TypeScript, Tailwind CSS v3 (warm editorial pastel palette), React Router v6, Lucide React, React Hook Form + Zod, Vitest + React Testing Library.
+- **Design Tokens**: Warm editorial pastel palette (`#FAF8F3` background, `#FFFFFF` surface, `#F5F0E8` sidebar, `#554637` primary, `#292722` text, pastel status badges). Typography: Geist Sans (UI) & Newsreader (serif titles).
+- **Architecture**:
+  - `src/lib/api.ts`: Central fetch client communicating with the backend over `/api` (proxied via Vite). Handles CSRF memory caching, automatic single retry on `403 CSRF_INVALID`, automatic redirect on unhandled `401`, and error normalization into `ApiError`.
+  - `src/features/auth/AuthContext.tsx` & `Guards.tsx`: Role-aware authentication context with `RequireAuth`, `RequireRole`, and `RedirectIfAuth` route guards.
+  - Role-specific workflows:
+    - **Student**: Student Overview, My Projects list, Create Project, Project Details (milestones management, team management up to 3 students via exact email search, submission, archive/restore).
+    - **Faculty**: Faculty Overview (pending reviews count & items, ready-to-complete items, compact status strip), All Projects dense directory, Pending Reviews queue, Project Details (evaluation, approve, request revisions, reject, final complete sign-off).
+    - **Shared**: Status history timeline, feedback thread, archived projects view, profile name & password update.
+- **Running & Testing**:
+  ```bash
+  # Run frontend tests
+  npm test --workspace=frontend
+
+  # Typecheck and build frontend
+  npm run typecheck --workspace=frontend
+  npm run build --workspace=frontend
+  ```
+
 ## API & Architecture
 
 See [docs/API_CONTRACT.md](file:///Users/honharsingh/Documents/linux-project/docs/API_CONTRACT.md) for the verbatim API specification and [docs/PROJECT_SPEC.md](file:///Users/honharsingh/Documents/linux-project/docs/PROJECT_SPEC.md) for the project specification.
