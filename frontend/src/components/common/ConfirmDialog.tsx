@@ -1,0 +1,135 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { Button } from './Button';
+import { Textarea } from './Textarea';
+
+export interface ConfirmDialogProps {
+  isOpen: boolean;
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  variant?: 'primary' | 'danger';
+  loading?: boolean;
+  requireMessage?: boolean;
+  showMessageInput?: boolean;
+  messageLabel?: string;
+  messagePlaceholder?: string;
+  onConfirm: (message?: string) => void;
+  onCancel: () => void;
+}
+
+export function ConfirmDialog({
+  isOpen,
+  title,
+  description,
+  confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
+  variant = 'primary',
+  loading = false,
+  requireMessage = false,
+  showMessageInput = false,
+  messageLabel = 'Message',
+  messagePlaceholder = 'Enter details...',
+  onConfirm,
+  onCancel,
+}: ConfirmDialogProps) {
+  const [message, setMessage] = useState('');
+  const [messageError, setMessageError] = useState('');
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousActiveElement = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      previousActiveElement.current = document.activeElement as HTMLElement;
+      setMessage('');
+      setMessageError('');
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          onCancel();
+        }
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+        if (previousActiveElement.current) {
+          previousActiveElement.current.focus();
+        }
+      };
+    }
+  }, [isOpen, onCancel]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (showMessageInput && requireMessage && !message.trim()) {
+      setMessageError('Message is required.');
+      return;
+    }
+    onConfirm(message.trim() || undefined);
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dialog-title"
+      aria-describedby="dialog-description"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text/40 backdrop-blur-xs animate-fade-in"
+    >
+      <div
+        ref={dialogRef}
+        className="bg-surface border border-border rounded-lg shadow-lg max-w-md w-full p-6 text-left"
+      >
+        <h3 id="dialog-title" className="font-serif text-xl font-semibold text-text mb-2">
+          {title}
+        </h3>
+        <p id="dialog-description" className="font-sans text-sm text-text-secondary mb-4">
+          {description}
+        </p>
+
+        <form onSubmit={handleSubmit}>
+          {showMessageInput && (
+            <div className="mb-4">
+              <Textarea
+                label={messageLabel}
+                placeholder={messagePlaceholder}
+                value={message}
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  if (messageError) setMessageError('');
+                }}
+                error={messageError}
+                rows={3}
+                required={requireMessage}
+              />
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-2.5 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="md"
+              onClick={onCancel}
+              disabled={loading}
+            >
+              {cancelLabel}
+            </Button>
+            <Button
+              type="submit"
+              variant={variant}
+              size="md"
+              loading={loading}
+              disabled={showMessageInput && requireMessage && !message.trim()}
+            >
+              {confirmLabel}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
