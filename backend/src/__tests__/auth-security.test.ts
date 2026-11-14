@@ -266,7 +266,8 @@ describe('Auth & Security Tests (Step 1 / 2A)', () => {
 
     it('cookie flags: HttpOnly and SameSite=Lax are present', async () => {
       const res = await request(app).get('/api/auth/csrf');
-      const cookieHeader = res.headers['set-cookie']?.join('; ') || '';
+      const raw = res.headers['set-cookie'];
+      const cookieHeader = Array.isArray(raw) ? raw.join('; ') : String(raw || '');
       expect(cookieHeader).toMatch(/projecthub\.sid=/);
       expect(cookieHeader).toMatch(/HttpOnly/i);
       expect(cookieHeader).toMatch(/SameSite=Lax/i);
@@ -546,14 +547,16 @@ describe('Auth & Security Tests (Step 1 / 2A)', () => {
 
       // Plain HTTP: no Secure flag
       const plainRes = await request(autoApp).get('/api/auth/csrf');
-      const plainCookie = plainRes.headers['set-cookie']?.join('; ') || '';
+      const rawPlain = plainRes.headers['set-cookie'];
+      const plainCookie = Array.isArray(rawPlain) ? rawPlain.join('; ') : String(rawPlain || '');
       expect(plainCookie).not.toMatch(/Secure/i);
 
       // HTTPS via proxy: sets Secure flag
       const httpsRes = await request(autoApp)
         .get('/api/auth/csrf')
         .set('X-Forwarded-Proto', 'https');
-      const httpsCookie = httpsRes.headers['set-cookie']?.join('; ') || '';
+      const rawHttps = httpsRes.headers['set-cookie'];
+      const httpsCookie = Array.isArray(rawHttps) ? rawHttps.join('; ') : String(rawHttps || '');
       expect(httpsCookie).toMatch(/Secure/i);
     });
 

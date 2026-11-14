@@ -13,11 +13,15 @@ import {
 } from './middleware/security';
 import { createRateLimiters } from './middleware/rateLimiter';
 import { UserRepository } from './repositories/userRepository';
+import { ProjectRepository } from './repositories/projectRepository';
 import { AuthService } from './services/authService';
+import { ProjectService } from './services/projectService';
 import { AuthController } from './controllers/authController';
+import { ProjectController } from './controllers/projectController';
 import { createAuthRouter } from './routes/auth';
 import { createProfileRouter } from './routes/profile';
 import { createDirectoryRouter } from './routes/directory';
+import { createProjectRouter } from './routes/projects';
 
 export function createApp(
   configOverrides?: Partial<AppConfig>,
@@ -94,11 +98,16 @@ export function createApp(
   const authService = new AuthService(userRepo, config);
   const authController = new AuthController(authService);
 
+  const projectRepo = new ProjectRepository();
+  const projectService = new ProjectService(pool, projectRepo, userRepo);
+  const projectController = new ProjectController(projectService);
+
   // 11. Routes
   app.use('/api', healthRouter);
   app.use('/api/auth', createAuthRouter(authController, rateLimiters));
   app.use('/api/profile', createProfileRouter(authController, rateLimiters));
   app.use('/api', createDirectoryRouter(authController, rateLimiters));
+  app.use('/api/projects', createProjectRouter(projectController));
 
   // 12. Central error handler
   app.use(errorHandler);
