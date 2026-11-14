@@ -5,6 +5,8 @@ import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 
+app.disable('x-powered-by');
+
 // Trust proxy
 app.set('trust proxy', env.TRUST_PROXY_HOPS);
 

@@ -1,12 +1,16 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Pool, PoolClient } from 'pg';
 
-const TEST_DATABASE_URL =
-  process.env.TEST_DATABASE_URL ||
-  process.env.DATABASE_URL;
+const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL;
 
 if (!TEST_DATABASE_URL) {
-  throw new Error('TEST_DATABASE_URL or DATABASE_URL must be set in environment');
+  throw new Error('TEST_DATABASE_URL must be set in environment');
+}
+
+const parsedDbUrl = new URL(TEST_DATABASE_URL);
+const dbName = parsedDbUrl.pathname.replace(/^\//, '');
+if (!dbName.endsWith('_test')) {
+  throw new Error(`TEST_DATABASE_URL database name "${dbName}" must end in "_test"`);
 }
 
 describe('Database Invariant Tests', () => {

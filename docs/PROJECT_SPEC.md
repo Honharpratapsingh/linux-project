@@ -25,7 +25,7 @@ Workflow & Lifecycle:
   REJECTED -> PENDING_REVIEW           (student resubmits)
   IN_PROGRESS -> COMPLETED             (faculty marks complete)
 - Archiving & Soft Deletion:
-  Orthogonal to status via archived_at/archived_by and deleted_at/deleted_by. A COMPLETED project can be archived; a REJECTED project can be soft-deleted.
+  Orthogonal to status via archived_at/archived_by and deleted_at/deleted_by. A COMPLETED or REJECTED project can be archived; soft-delete requires the project to be archived first (deleted_at requires archived_at).
 
 Database Schema:
 - users: id (UUID PK), full_name, email, password_hash, role CHECK IN ('STUDENT','FACULTY'), registration_number NULL, created_at, updated_at; UNIQUE INDEX on lower(email).
