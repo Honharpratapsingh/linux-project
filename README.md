@@ -3,7 +3,7 @@
 Student Project Tracking and Management System — SRM Institute of Science and Technology  
 Course: 21CSE216P (Linux and Container Technologies)
 
-## Phase 1 — Verified Environment
+## Phase 1 & 2 — Verified Environment
 
 | Tool | Version | Status |
 |------|---------|--------|
@@ -34,79 +34,52 @@ cp .env.example .env
 # Note: Migrations live in backend/migrations
 npm run migrate
 
-# 4. Start backend (runs on dev port 5001)
+# 4. Provision initial faculty account (or run demo seed)
+FACULTY_NAME="Dr. Rajesh Sharma" FACULTY_EMAIL="sharma@example.com" FACULTY_PASSWORD="faculty_password_123" npm run provision:faculty
+
+# 5. (Optional) Seed demo data across all statuses
+DEMO_SEED_PASSWORD="demo_password_123" npm run seed:demo
+
+# 6. Start backend (runs on dev port 5001)
 npm run dev:backend
 
-# 5. Start frontend (port 5173, proxies /api to port 5001)
+# 7. Start frontend (port 5173, proxies /api to port 5001)
 npm run dev:frontend
 ```
 
 ## Running Tests
 
-To run the full test suite against the local test database without hardcoded credentials in source files, pass the test database URL in the environment:
+To run the complete test suite against the local test database without hardcoded credentials in source files, pass the test database URL in the environment:
 
 ```bash
-DATABASE_URL=postgresql://projecthub:projecthub@localhost:5432/projecthub_test npm test
+TEST_DATABASE_URL=postgresql://projecthub:projecthub@localhost:5432/projecthub_test npm test
 ```
 
-## Verified Commands (Phase 1)
+## CLI Scripts
+
+### Faculty Provisioning
+Creates a `FACULTY` user with a bcrypt hashed password. Fails if environment variables are missing, the email already exists, or the password is under 8 characters:
 
 ```bash
-# Backend health check (with backend running on dev port 5001)
-curl http://127.0.0.1:5001/api/health
-# → {"status":"ok","db":"up"}
-
-# Frontend proxy check (with frontend running on 5173 and backend on 5001)
-curl http://localhost:5173/api/health
-# → {"status":"ok","db":"up"}
-
-# Backend unit and DB invariant tests
-DATABASE_URL=postgresql://projecthub:projecthub@localhost:5432/projecthub_test npm run test --workspace=backend
-
-# Frontend unit tests
-npm run test --workspace=frontend
+FACULTY_NAME="Dr. Ananya Iyer" FACULTY_EMAIL="iyer@example.com" FACULTY_PASSWORD="secure_faculty_password" npm run provision:faculty
 ```
 
-## Project Structure
+### Demo Seeding
+Idempotent demo dataset generator. Creates 3 faculty members, 6 students, and 9 projects covering every status (including `IN_PROGRESS` with completed milestones, `COMPLETED` archived, and `DRAFT` full team). Refuses to run in production unless `ALLOW_DEMO_SEED=true`:
 
-```
-projecthub/
-├── backend/
-│   ├── migrations/   # Plain SQL migrations (001 through 008)
-│   ├── src/
-│   │   ├── config/   # Environment config (env.ts defaults to port 5000)
-│   │   ├── db/       # Pool and migration runner
-│   │   ├── middleware/
-│   │   ├── routes/
-│   │   ├── app.ts
-│   │   └── server.ts
-│   └── package.json
-├── frontend/         # React + Vite + Tailwind (warm pastel editorial tokens)
-│   ├── src/
-│   │   ├── lib/      # api.ts fetch skeleton
-│   │   ├── pages/    # HomePage placeholder
-│   │   └── index.css
-│   └── package.json
-├── docs/
-│   └── PROJECT_SPEC.md  # Authoritative condensed specification
-├── scripts/
-│   └── dev-db.sh     # Dev container launcher (Podman)
-├── .env.example
-├── package.json
-└── README.md
+```bash
+DEMO_SEED_PASSWORD="demo_seed_password_123" npm run seed:demo
 ```
 
-## Roles
-- **STUDENT**: Self-registers, creates projects, manages team (up to 3 members), tracks milestones.
-- **FACULTY**: Provisioned by admin script. Reviews, approves, rejects, provides feedback, marks complete.
+## API & Architecture
 
-## Workflow Statuses & Transitions
-```
-DRAFT → PENDING_REVIEW              (student submits)
-PENDING_REVIEW → IN_PROGRESS        (faculty approves)
-PENDING_REVIEW → CHANGES_REQUESTED  (faculty requests changes)
-PENDING_REVIEW → REJECTED           (faculty rejects)
-CHANGES_REQUESTED → PENDING_REVIEW  (student resubmits)
-REJECTED → PENDING_REVIEW           (student resubmits)
-IN_PROGRESS → COMPLETED             (faculty marks complete)
-```
+See [docs/API_CONTRACT.md](file:///Users/honharsingh/Documents/linux-project/docs/API_CONTRACT.md) for the verbatim API specification and [docs/PROJECT_SPEC.md](file:///Users/honharsingh/Documents/linux-project/docs/PROJECT_SPEC.md) for the project specification.
+
+- **Stack**: Express + TypeScript, Zod, bcrypt, express-session + connect-pg-simple (`session` table), express-rate-limit, pg parameterized queries, Vitest + supertest.
+- **Layers**: routes -> controllers -> services -> repositories.
+- **Security**:
+  - `X-Powered-By` disabled; `Cache-Control: no-store` and `X-Content-Type-Options: nosniff` on all responses.
+  - Session cookie (`projecthub.sid`): `HttpOnly`, `SameSite=Lax`, configurable `Secure` mode (`auto`, `true`, `false`).
+  - CSRF: `GET /api/auth/csrf` issues session token; header `X-CSRF-Token` verified with `crypto.timingSafeEqual` on all mutation requests (`POST`, `PATCH`, `PUT`, `DELETE`). `Origin` header validated against `ALLOWED_ORIGINS`.
+  - Rate Limiting: Login strict (5 failed per 15 min per IP+email), login loose (50 failed per 15 min per IP), registration (10/hr per IP), student search (30/min per user), password change (5 per 15 min per user).
+  - Transactions: All state-changing project, workflow, team, milestone, and feedback operations execute inside PostgreSQL transactions using `SELECT ... FROM projects WHERE id = $1 AND deleted_at IS NULL FOR UPDATE` project row locks to guarantee concurrency safety.
