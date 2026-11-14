@@ -1,4 +1,31 @@
+import fs from 'fs';
+import path from 'path';
 import { z } from 'zod';
+
+function loadDotenv() {
+  const envPath = path.resolve(__dirname, '../../../.env');
+  if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, 'utf8').split('\n');
+    for (const line of lines) {
+      const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
+      if (match) {
+        const key = match[1];
+        let val = (match[2] || '').trim();
+        if (
+          (val.startsWith('"') && val.endsWith('"')) ||
+          (val.startsWith("'") && val.endsWith("'"))
+        ) {
+          val = val.slice(1, -1);
+        }
+        if (process.env[key] === undefined) {
+          process.env[key] = val;
+        }
+      }
+    }
+  }
+}
+
+loadDotenv();
 
 const cookieSecureSchema = z.enum(['auto', 'true', 'false']).default('auto');
 
