@@ -450,6 +450,91 @@ describe('Auth & Security Tests (Step 1 / 2A)', () => {
       expect(resSpoof.status).toBe(429);
     });
 
+    it('a spoofed leftmost X-Forwarded-For ("1.2.3.4, <real>") does not evade the login limit when trust proxy = 1', async () => {
+      const testApp = createApp(
+        {
+          BCRYPT_ROUNDS: 4,
+          RATE_LIMIT_LOGIN_STRICT_MAX: 5,
+          RATE_LIMIT_LOGIN_LOOSE_MAX: 50,
+          TRUST_PROXY_HOPS: 1,
+        },
+        pool
+      );
+
+      const agent = request.agent(testApp);
+      const email = 'spoof-test@example.com';
+      const realClientIp = '198.51.100.42';
+
+      // Exhaust strict login attempts for realClientIp
+      for (let i = 0; i < 5; i++) {
+        const csrf = await getCsrfToken(agent);
+        const res = await agent
+          .post('/api/auth/login')
+          .set('X-CSRF-Token', csrf)
+          .set('X-Forwarded-For', realClientIp)
+          .send({ email, password: 'wrongpassword' });
+        expect(res.status).toBe(401);
+      }
+
+      // Attacker attempts to spoof client IP by prepending 1.2.3.4 in X-Forwarded-For: "1.2.3.4, 198.51.100.42"
+      // With trust proxy = 1, Express takes the last hop (198.51.100.42), which is already rate limited
+      const csrfSpoof = await getCsrfToken(agent);
+      const resSpoof = await agent
+        .post('/api/auth/login')
+        .set('X-CSRF-Token', csrfSpoof)
+        .set('X-Forwarded-For', `1.2.3.4, ${realClientIp}`)
+        .send({ email, password: 'wrongpassword' });
+
+      expect(resSpoof.status).toBe(429);
+      expect(resSpoof.body.error.code).toBe('RATE_LIMITED');
+    });
+
+    it('per-IP loose login limiter: with the strict per-ip+email limit exhausted for one email, a different email from the same IP is still allowed until the per-IP ceiling', async () => {
+      const testApp = createApp(
+        {
+          BCRYPT_ROUNDS: 4,
+          RATE_LIMIT_LOGIN_STRICT_MAX: 3,
+          RATE_LIMIT_LOGIN_LOOSE_MAX: 10,
+          TRUST_PROXY_HOPS: 1,
+        },
+        pool
+      );
+
+      const agent = request.agent(testApp);
+      const email1 = 'user-one@example.com';
+      const email2 = 'user-two@example.com';
+      const clientIp = '198.51.100.99';
+
+      // 3 failed logins for email1 -> exhausts strict limiter
+      for (let i = 0; i < 3; i++) {
+        const csrf = await getCsrfToken(agent);
+        const res = await agent
+          .post('/api/auth/login')
+          .set('X-CSRF-Token', csrf)
+          .set('X-Forwarded-For', clientIp)
+          .send({ email: email1, password: 'wrongpassword' });
+        expect(res.status).toBe(401);
+      }
+
+      // 4th attempt for email1 is blocked (429)
+      const csrfBlocked = await getCsrfToken(agent);
+      const resBlocked = await agent
+        .post('/api/auth/login')
+        .set('X-CSRF-Token', csrfBlocked)
+        .set('X-Forwarded-For', clientIp)
+        .send({ email: email1, password: 'wrongpassword' });
+      expect(resBlocked.status).toBe(429);
+
+      // Different email from same IP is NOT blocked by strict limiter (per-IP loose ceiling 10 not reached)
+      const csrfAllowed = await getCsrfToken(agent);
+      const resAllowed = await agent
+        .post('/api/auth/login')
+        .set('X-CSRF-Token', csrfAllowed)
+        .set('X-Forwarded-For', clientIp)
+        .send({ email: email2, password: 'wrongpassword' });
+      expect(resAllowed.status).toBe(401); // 401 unauthenticated, not 429 rate limited
+    });
+
     it('register rate limit: 3rd attempt gets 429 when max is 2', async () => {
       const testApp = createApp(
         {
