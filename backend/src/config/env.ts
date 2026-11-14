@@ -1,31 +1,4 @@
-import fs from 'fs';
-import path from 'path';
 import { z } from 'zod';
-
-function loadDotenv() {
-  const envPath = path.resolve(__dirname, '../../../.env');
-  if (fs.existsSync(envPath)) {
-    const lines = fs.readFileSync(envPath, 'utf8').split('\n');
-    for (const line of lines) {
-      const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)?\s*$/);
-      if (match) {
-        const key = match[1];
-        let val = (match[2] || '').trim();
-        if (
-          (val.startsWith('"') && val.endsWith('"')) ||
-          (val.startsWith("'") && val.endsWith("'"))
-        ) {
-          val = val.slice(1, -1);
-        }
-        if (process.env[key] === undefined) {
-          process.env[key] = val;
-        }
-      }
-    }
-  }
-}
-
-loadDotenv();
 
 const cookieSecureSchema = z.enum(['auto', 'true', 'false']).default('auto');
 
@@ -53,7 +26,6 @@ export type AppConfig = {
   SESSION_TTL_HOURS: number;
   BCRYPT_ROUNDS: number;
   ALLOWED_ORIGINS: string;
-  // Optional rate-limit overrides for testing
   RATE_LIMIT_LOGIN_STRICT_MAX?: number;
   RATE_LIMIT_LOGIN_LOOSE_MAX?: number;
   RATE_LIMIT_REGISTER_MAX?: number;
@@ -61,19 +33,21 @@ export type AppConfig = {
   RATE_LIMIT_PASSWORD_MAX?: number;
 };
 
-function loadEnv(): AppConfig {
-  const isProd = process.env.NODE_ENV === 'production';
-  const isTest = process.env.NODE_ENV === 'test';
+export function loadEnv(customEnv?: Record<string, string | undefined>): AppConfig {
+  const envSource = customEnv || process.env;
+  const isTest = envSource.NODE_ENV === 'test';
 
+  // When NODE_ENV === 'test', test defaults apply.
+  // In development and production, DATABASE_URL and SESSION_SECRET are strictly required with no defaults.
   const databaseUrl =
-    process.env.DATABASE_URL || (isTest ? process.env.TEST_DATABASE_URL : undefined);
+    envSource.DATABASE_URL || (isTest ? envSource.TEST_DATABASE_URL : undefined);
 
   const sessionSecret =
-    process.env.SESSION_SECRET ||
-    (!isProd ? 'development-session-secret-must-be-at-least-32-chars-long' : undefined);
+    envSource.SESSION_SECRET ||
+    (isTest ? 'test-session-secret-must-be-at-least-32-chars-long' : undefined);
 
   const raw = {
-    ...process.env,
+    ...envSource,
     ...(databaseUrl ? { DATABASE_URL: databaseUrl } : {}),
     ...(sessionSecret ? { SESSION_SECRET: sessionSecret } : {}),
   };
@@ -84,7 +58,7 @@ function loadEnv(): AppConfig {
       .map((i) => `  ${i.path.join('.')}: ${i.message}`)
       .join('\n');
     const msg = `[config] Invalid environment variables:\n${issues}`;
-    if (isTest) {
+    if (isTest || customEnv) {
       throw new Error(msg);
     }
     console.error(msg);

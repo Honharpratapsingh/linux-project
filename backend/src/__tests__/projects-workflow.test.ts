@@ -329,6 +329,38 @@ describe('Projects & Workflow Tests (Step 2 / 2B)', () => {
       expect(resubmitRes.body.status).toBe('PENDING_REVIEW');
     });
 
+    it('a student and a non-guide faculty each get 403 on approve, reject, request-changes and complete', async () => {
+      // Transition project to PENDING_REVIEW first so actions are state-valid for the guide
+      let csrf = await getCsrfToken(student1Agent);
+      await student1Agent
+        .post(`/api/projects/${projectId}/submit`)
+        .set('X-CSRF-Token', csrf);
+
+      const endpoints = ['approve', 'reject', 'request-changes', 'complete'];
+
+      // Student attempt on all 4 endpoints returns 403
+      for (const ep of endpoints) {
+        csrf = await getCsrfToken(student1Agent);
+        const res = await student1Agent
+          .post(`/api/projects/${projectId}/${ep}`)
+          .set('X-CSRF-Token', csrf)
+          .send({ message: 'student attempt' });
+        expect(res.status).toBe(403);
+        expect(res.body.error.code).toBe('FORBIDDEN');
+      }
+
+      // Non-guide faculty attempt on all 4 endpoints returns 403
+      for (const ep of endpoints) {
+        csrf = await getCsrfToken(faculty2Agent);
+        const res = await faculty2Agent
+          .post(`/api/projects/${projectId}/${ep}`)
+          .set('X-CSRF-Token', csrf)
+          .send({ message: 'non-guide faculty attempt' });
+        expect(res.status).toBe(403);
+        expect(res.body.error.code).toBe('FORBIDDEN');
+      }
+    });
+
     it('approve: transitions to IN_PROGRESS, creates APPROVAL feedback with default message if omitted', async () => {
       // Submit first
       let csrf = await getCsrfToken(student1Agent);
@@ -473,6 +505,67 @@ describe('Projects & Workflow Tests (Step 2 / 2B)', () => {
         .set('X-CSRF-Token', csrf)
         .send({ title: 'New Locked Title' });
       expect(editLocked.status).toBe(403);
+    });
+
+    it('a non-creator member cannot edit or submit a project', async () => {
+      // Add student 2 (Bob) as a MEMBER of the project
+      await pool.query(
+        "INSERT INTO project_members (project_id, student_id, membership_role) VALUES ($1, $2, 'MEMBER')",
+        [projectId, student2Id]
+      );
+
+      // Non-creator member tries to edit project -> 403 FORBIDDEN
+      let csrf = await getCsrfToken(student2Agent);
+      const editRes = await student2Agent
+        .patch(`/api/projects/${projectId}`)
+        .set('X-CSRF-Token', csrf)
+        .send({ title: 'Hacked Title by Member' });
+      expect(editRes.status).toBe(403);
+      expect(editRes.body.error.code).toBe('FORBIDDEN');
+
+      // Non-creator member tries to submit project -> 403 FORBIDDEN
+      csrf = await getCsrfToken(student2Agent);
+      const submitRes = await student2Agent
+        .post(`/api/projects/${projectId}/submit`)
+        .set('X-CSRF-Token', csrf);
+      expect(submitRes.status).toBe(403);
+      expect(submitRes.body.error.code).toBe('FORBIDDEN');
+    });
+
+    it('the creator cannot archive a non-DRAFT project; the guide cannot archive a DRAFT', async () => {
+      // 1. While project is DRAFT: guide cannot archive DRAFT (403)
+      let csrf = await getCsrfToken(faculty1Agent);
+      const guideDraftArch = await faculty1Agent
+        .patch(`/api/projects/${projectId}/archive`)
+        .set('X-CSRF-Token', csrf);
+      expect(guideDraftArch.status).toBe(403);
+      expect(guideDraftArch.body.error.code).toBe('FORBIDDEN');
+
+      // 2. Transition project to PENDING_REVIEW: creator cannot archive non-DRAFT (403)
+      csrf = await getCsrfToken(student1Agent);
+      await student1Agent
+        .post(`/api/projects/${projectId}/submit`)
+        .set('X-CSRF-Token', csrf);
+
+      csrf = await getCsrfToken(student1Agent);
+      const creatorNonDraftArch1 = await student1Agent
+        .patch(`/api/projects/${projectId}/archive`)
+        .set('X-CSRF-Token', csrf);
+      expect(creatorNonDraftArch1.status).toBe(403);
+      expect(creatorNonDraftArch1.body.error.code).toBe('FORBIDDEN');
+
+      // 3. Guide transitions to IN_PROGRESS: creator cannot archive IN_PROGRESS (403)
+      csrf = await getCsrfToken(faculty1Agent);
+      await faculty1Agent
+        .post(`/api/projects/${projectId}/approve`)
+        .set('X-CSRF-Token', csrf);
+
+      csrf = await getCsrfToken(student1Agent);
+      const creatorNonDraftArch2 = await student1Agent
+        .patch(`/api/projects/${projectId}/archive`)
+        .set('X-CSRF-Token', csrf);
+      expect(creatorNonDraftArch2.status).toBe(403);
+      expect(creatorNonDraftArch2.body.error.code).toBe('FORBIDDEN');
     });
 
     it('archive & restore rules: creator archives DRAFT; guide archives COMPLETED/REJECTED; creator cannot restore guide-archived REJECTED', async () => {

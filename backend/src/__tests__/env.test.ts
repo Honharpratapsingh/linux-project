@@ -26,4 +26,24 @@ describe('env validator', () => {
     expect(schema.safeParse({ COOKIE_SECURE: 'yes' }).success).toBe(false);
     expect(schema.safeParse({ COOKIE_SECURE: 'auto' }).success).toBe(true);
   });
+
+  it('fails fast when NODE_ENV=development and DATABASE_URL is missing', async () => {
+    const { loadEnv } = await import('../config/env');
+    expect(() => {
+      loadEnv({
+        NODE_ENV: 'development',
+        SESSION_SECRET: 'a'.repeat(32),
+      });
+    }).toThrow(/DATABASE_URL: Required/);
+  });
+
+  it('fails fast when NODE_ENV=development and SESSION_SECRET is missing', async () => {
+    const { loadEnv } = await import('../config/env');
+    expect(() => {
+      loadEnv({
+        NODE_ENV: 'development',
+        DATABASE_URL: 'postgres://localhost/mydb',
+      });
+    }).toThrow(/SESSION_SECRET: Required/);
+  });
 });

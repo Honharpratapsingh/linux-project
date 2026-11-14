@@ -202,6 +202,32 @@ describe('Auth & Security Tests (Step 1 / 2A)', () => {
       expect(meRes.body.user.email).toBe('alice@example.com');
     });
 
+    it('/api/auth/me restores the session across separate requests', async () => {
+      const agent = request.agent(app);
+      const csrf = await getCsrfToken(agent);
+
+      const loginRes = await agent
+        .post('/api/auth/login')
+        .set('X-CSRF-Token', csrf)
+        .send({
+          email: 'alice@example.com',
+          password: 'password123',
+        });
+      expect(loginRes.status).toBe(200);
+
+      // First separate request to /api/auth/me
+      const me1 = await agent.get('/api/auth/me');
+      expect(me1.status).toBe(200);
+      expect(me1.body.user.email).toBe('alice@example.com');
+      expect(me1.body.user.fullName).toBe('Alice Student');
+
+      // Second separate request to /api/auth/me using the persisted session
+      const me2 = await agent.get('/api/auth/me');
+      expect(me2.status).toBe(200);
+      expect(me2.body.user.email).toBe('alice@example.com');
+      expect(me2.body.user.id).toBe(me1.body.user.id);
+    });
+
     it('login failure returns identical message for unknown email and wrong password', async () => {
       const agent1 = request.agent(app);
       const csrf1 = await getCsrfToken(agent1);

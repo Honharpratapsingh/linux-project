@@ -2,43 +2,41 @@ import { Pool } from 'pg';
 import bcrypt from 'bcrypt';
 import { env } from '../config/env';
 
-async function seedDemo(): Promise<void> {
-  const password = process.env.DEMO_SEED_PASSWORD;
+export async function runSeedDemo(
+  pool: Pool,
+  demoPassword?: string
+): Promise<{ projectCount: number; skipped: boolean }> {
+  const password = demoPassword || process.env.DEMO_SEED_PASSWORD;
   if (!password) {
-    console.error(
+    throw new Error(
       '[seed:demo] Error: DEMO_SEED_PASSWORD environment variable is required.'
     );
-    process.exit(1);
   }
 
   if (process.env.NODE_ENV === 'production' && process.env.ALLOW_DEMO_SEED !== 'true') {
-    console.error(
+    throw new Error(
       '[seed:demo] Error: Demo seeding is forbidden in production unless ALLOW_DEMO_SEED=true.'
     );
-    process.exit(1);
   }
 
-  const pool = new Pool({ connectionString: env.DATABASE_URL });
-
-  try {
-    // 1. Check idempotency
-    const checkRes = await pool.query<{ count: string }>(
-      "SELECT count(*)::text as count FROM users WHERE email LIKE '%@demo.projecthub.test'"
+  // 1. Check idempotency
+  const checkRes = await pool.query<{ count: string }>(
+    "SELECT count(*)::text as count FROM users WHERE email LIKE '%@demo.projecthub.test'"
+  );
+  const existingCount = parseInt(checkRes.rows[0]?.count || '0', 10);
+  if (existingCount > 0) {
+    console.log(
+      `[seed:demo] Demo users already exist (${existingCount} found). Skipping demo seed (idempotent).`
     );
-    const existingCount = parseInt(checkRes.rows[0]?.count || '0', 10);
-    if (existingCount > 0) {
-      console.log(
-        `[seed:demo] Demo users already exist (${existingCount} found). Skipping demo seed (idempotent).`
-      );
-      return;
-    }
+    return { projectCount: 0, skipped: true };
+  }
 
-    const rounds = env.BCRYPT_ROUNDS || 12;
-    const passwordHash = await bcrypt.hash(password, rounds);
+  const rounds = env.BCRYPT_ROUNDS || 12;
+  const passwordHash = await bcrypt.hash(password, rounds);
 
-    const client = await pool.connect();
-    try {
-      await client.query('BEGIN');
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
 
       // 2. Create 3 Faculty
       const facultyData = [
@@ -330,6 +328,19 @@ async function seedDemo(): Promise<void> {
         [p9.rows[0].id]
       );
 
+      const projectIds = [
+        p1.rows[0].id,
+        p2.rows[0].id,
+        p3.rows[0].id,
+        p4.rows[0].id,
+        p5.rows[0].id,
+        p6.rows[0].id,
+        p7.rows[0].id,
+        p8.rows[0].id,
+        p9.rows[0].id,
+      ];
+      const projectCount = projectIds.length;
+
       await client.query('COMMIT');
 
       console.log('----------------------------------------------------');
@@ -348,21 +359,25 @@ async function seedDemo(): Promise<void> {
       console.log('  5. Sanya Reddy (Demo)        : reddy@demo.projecthub.test');
       console.log('  6. Aditya Joshi (Demo)       : joshi@demo.projecthub.test');
       console.log('----------------------------------------------------');
-      console.log('9 Demo projects seeded across DRAFT, PENDING_REVIEW, CHANGES_REQUESTED,');
-      console.log('REJECTED, IN_PROGRESS (incl. readyToComplete), COMPLETED, and ARCHIVED.');
+      console.log(`${projectCount} Demo projects seeded across DRAFT, PENDING_REVIEW, CHANGES_REQUESTED,`);
+      console.log('REJECTED, IN_PROGRESS (incl. readyToComplete), and COMPLETED.');
       console.log('----------------------------------------------------');
+
+      return { projectCount, skipped: false };
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
     } finally {
       client.release();
     }
-  } finally {
-    await pool.end();
-  }
 }
 
-seedDemo().catch((err) => {
-  console.error('[seed:demo] Unexpected error:', err.message);
-  process.exit(1);
-});
+if (require.main === module) {
+  const pool = new Pool({ connectionString: env.DATABASE_URL });
+  runSeedDemo(pool)
+    .then(() => pool.end())
+    .catch((err) => {
+      console.error('[seed:demo] Unexpected error:', err.message);
+      pool.end().finally(() => process.exit(1));
+    });
+}

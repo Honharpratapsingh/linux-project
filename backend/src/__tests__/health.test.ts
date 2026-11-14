@@ -7,7 +7,7 @@ vi.mock('../config/env', () => ({
     DATABASE_URL:
       process.env.TEST_DATABASE_URL ||
       process.env.DATABASE_URL ||
-      'postgresql://localhost:5432/projecthub_test',
+      'mock://mock-db/test',
     SESSION_SECRET: 'test-secret-that-is-at-least-32-characters-long',
     PORT: 5000,
     NODE_ENV: 'test',
