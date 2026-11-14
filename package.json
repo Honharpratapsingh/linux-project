@@ -4,7 +4,7 @@
   "private": true,
   "workspaces": ["backend", "frontend"],
   "scripts": {
-    "dev:backend": "npm run dev --workspace=backend",
+    "dev:backend": "PORT=5001 npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
     "test": "npm run test --workspaces --if-present",
     "migrate": "npm run migrate --workspace=backend",

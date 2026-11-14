@@ -1,5 +1,31 @@
+@import '@fontsource/geist-sans';
+@import '@fontsource/newsreader';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+:root {
+  --background: #FAF8F3;
+  --surface: #FFFFFF;
+  --sidebar: #F5F0E8;
+  --primary: #554637;
+  --primary-hover: #43372C;
+  --text: #292722;
+  --text-secondary: #75695F;
+  --text-muted: #8C8073;
+  --border: #E8E1D7;
+  --divider: #EEE9E2;
+  --sage: #DCE8DE;
+  --lavender: #E9DFF1;
+  --blue: #DDE8F1;
+  --peach: #F3DFD3;
+  --error: #A33F3F;
+  --focus: #7B6855;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text);
+  font-family: 'Geist Sans', sans-serif;
+}

@@ -4,24 +4,30 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ProjectHub design tokens
+        background: 'var(--background)',
+        surface: 'var(--surface)',
+        sidebar: 'var(--sidebar)',
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          900: '#1e3a8a',
+          DEFAULT: 'var(--primary)',
+          hover: 'var(--primary-hover)',
         },
-        secondary: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          500: '#64748b',
-          900: '#0f172a',
+        text: {
+          DEFAULT: 'var(--text)',
+          secondary: 'var(--text-secondary)',
+          muted: 'var(--text-muted)',
         },
+        border: 'var(--border)',
+        divider: 'var(--divider)',
+        sage: 'var(--sage)',
+        lavender: 'var(--lavender)',
+        blue: 'var(--blue)',
+        peach: 'var(--peach)',
+        error: 'var(--error)',
+        focus: 'var(--focus)',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['"Geist Sans"', 'sans-serif'],
+        serif: ['Newsreader', 'serif'],
       },
     },
   },

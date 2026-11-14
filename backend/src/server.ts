@@ -2,8 +2,10 @@ import app from './app';
 import { env } from './config/env';
 import { pool } from './db/pool';
 
-const server = app.listen(env.PORT, () => {
-  console.log(`[server] Backend listening on port ${env.PORT} (${env.NODE_ENV})`);
+const HOST = process.env.HOST || '127.0.0.1';
+
+const server = app.listen(env.PORT, HOST, () => {
+  console.log(`[server] Backend listening on http://${HOST}:${env.PORT} (${env.NODE_ENV})`);
 });
 
 function shutdown(signal: string) {
