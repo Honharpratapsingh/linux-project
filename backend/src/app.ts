@@ -14,14 +14,29 @@ import {
 import { createRateLimiters } from './middleware/rateLimiter';
 import { UserRepository } from './repositories/userRepository';
 import { ProjectRepository } from './repositories/projectRepository';
+import { MilestoneRepository } from './repositories/milestoneRepository';
+import { FeedbackRepository } from './repositories/feedbackRepository';
+import { DashboardRepository } from './repositories/dashboardRepository';
+
 import { AuthService } from './services/authService';
 import { ProjectService } from './services/projectService';
+import { TeamService } from './services/teamService';
+import { MilestoneService } from './services/milestoneService';
+import { FeedbackService } from './services/feedbackService';
+import { DashboardService } from './services/dashboardService';
+
 import { AuthController } from './controllers/authController';
 import { ProjectController } from './controllers/projectController';
+import { TeamController } from './controllers/teamController';
+import { MilestoneController } from './controllers/milestoneController';
+import { FeedbackController } from './controllers/feedbackController';
+import { DashboardController } from './controllers/dashboardController';
+
 import { createAuthRouter } from './routes/auth';
 import { createProfileRouter } from './routes/profile';
 import { createDirectoryRouter } from './routes/directory';
 import { createProjectRouter } from './routes/projects';
+import { createDashboardRouter } from './routes/dashboard';
 
 export function createApp(
   configOverrides?: Partial<AppConfig>,
@@ -93,23 +108,46 @@ export function createApp(
   // 9. Rate limiters
   const rateLimiters = createRateLimiters(config);
 
-  // 10. DI Services & Controllers
+  // 10. Repositories
   const userRepo = new UserRepository(pool);
-  const authService = new AuthService(userRepo, config);
-  const authController = new AuthController(authService);
-
   const projectRepo = new ProjectRepository();
-  const projectService = new ProjectService(pool, projectRepo, userRepo);
-  const projectController = new ProjectController(projectService);
+  const milestoneRepo = new MilestoneRepository();
+  const feedbackRepo = new FeedbackRepository();
+  const dashboardRepo = new DashboardRepository(pool, projectRepo);
 
-  // 11. Routes
+  // 11. Services
+  const authService = new AuthService(userRepo, config);
+  const projectService = new ProjectService(pool, projectRepo, userRepo);
+  const teamService = new TeamService(pool, projectService, projectRepo, userRepo);
+  const milestoneService = new MilestoneService(pool, projectService, milestoneRepo);
+  const feedbackService = new FeedbackService(pool, projectService, feedbackRepo);
+  const dashboardService = new DashboardService(dashboardRepo);
+
+  // 12. Controllers
+  const authController = new AuthController(authService);
+  const projectController = new ProjectController(projectService);
+  const teamController = new TeamController(teamService);
+  const milestoneController = new MilestoneController(milestoneService);
+  const feedbackController = new FeedbackController(feedbackService);
+  const dashboardController = new DashboardController(dashboardService);
+
+  // 13. Routes
   app.use('/api', healthRouter);
   app.use('/api/auth', createAuthRouter(authController, rateLimiters));
   app.use('/api/profile', createProfileRouter(authController, rateLimiters));
   app.use('/api', createDirectoryRouter(authController, rateLimiters));
-  app.use('/api/projects', createProjectRouter(projectController));
+  app.use(
+    '/api/projects',
+    createProjectRouter(
+      projectController,
+      teamController,
+      milestoneController,
+      feedbackController
+    )
+  );
+  app.use('/api/dashboard', createDashboardRouter(dashboardController));
 
-  // 12. Central error handler
+  // 14. Central error handler
   app.use(errorHandler);
 
   return app;

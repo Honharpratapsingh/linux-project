@@ -9,6 +9,7 @@
     "test": "npm run test --workspaces --if-present",
     "migrate": "npm run migrate --workspace=backend",
     "provision:faculty": "npm run provision:faculty --workspace=backend",
+    "seed:demo": "npm run seed:demo --workspace=backend",
     "typecheck": "npm run typecheck --workspaces --if-present"
   }
 }
