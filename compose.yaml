@@ -71,7 +71,9 @@ services:
 
 networks:
   projecthub-net:
+    name: projecthub-net
     driver: bridge
 
 volumes:
   projecthub-pgdata:
+    name: projecthub-pgdata
