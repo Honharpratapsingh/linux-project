@@ -82,7 +82,7 @@ export default function LoginPage() {
               label="Email address"
               type="email"
               autoComplete="email"
-              placeholder="name@demo.projecthub.test"
+              placeholder="name@example.com"
               error={errors.email?.message}
               required
               {...register('email')}

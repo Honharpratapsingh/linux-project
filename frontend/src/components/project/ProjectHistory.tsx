@@ -1,6 +1,7 @@
 import { History, GitCommit } from 'lucide-react';
 import { HistoryEntry } from '../../types/api';
 import { formatDateTime } from '../../lib/dates';
+import { formatStatusLabel } from '../../lib/status';
 
 interface ProjectHistoryProps {
   history: HistoryEntry[];
@@ -37,12 +38,12 @@ export function ProjectHistory({ history }: ProjectHistoryProps) {
                   <div className="flex items-center gap-1.5 font-medium text-text">
                     {h.previousStatus ? (
                       <>
-                        <span className="text-text-muted">{h.previousStatus}</span>
+                        <span className="text-text-muted">{formatStatusLabel(h.previousStatus)}</span>
                         <span>&rarr;</span>
-                        <span className="text-primary font-semibold">{h.newStatus}</span>
+                        <span className="text-primary font-semibold">{formatStatusLabel(h.newStatus)}</span>
                       </>
                     ) : (
-                      <span className="text-primary font-semibold">Created ({h.newStatus})</span>
+                      <span className="text-primary font-semibold">Created ({formatStatusLabel(h.newStatus)})</span>
                     )}
                   </div>
                   <span className="text-text-muted tabular-nums">

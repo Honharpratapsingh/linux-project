@@ -9,6 +9,7 @@ export interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: 'primary' | 'danger';
+  confirmClassName?: string;
   loading?: boolean;
   requireMessage?: boolean;
   showMessageInput?: boolean;
@@ -25,6 +26,7 @@ export function ConfirmDialog({
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
   variant = 'primary',
+  confirmClassName,
   loading = false,
   requireMessage = false,
   showMessageInput = false,
@@ -120,9 +122,10 @@ export function ConfirmDialog({
             </Button>
             <Button
               type="submit"
-              variant={variant}
+              variant={confirmClassName ? 'outline' : variant}
               size="md"
               loading={loading}
+              className={confirmClassName}
               disabled={showMessageInput && requireMessage && !message.trim()}
             >
               {confirmLabel}

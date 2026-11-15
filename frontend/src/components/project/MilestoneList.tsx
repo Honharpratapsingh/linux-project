@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, Plus, Trash2, Edit2, Calendar, AlertCircle } from 'lucide-react';
-import { Milestone } from '../../types/api';
+import { Milestone, ProjectStatus } from '../../types/api';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 import { Textarea } from '../common/Textarea';
@@ -10,6 +10,8 @@ import { formatDate } from '../../lib/dates';
 interface MilestoneListProps {
   milestones: Milestone[];
   canManage: boolean;
+  status?: ProjectStatus;
+  isArchived?: boolean;
   onToggleComplete: (milestone: Milestone) => Promise<void>;
   onCreateMilestone: (data: { title: string; description?: string; dueDate?: string }) => Promise<void>;
   onUpdateMilestone: (id: string, data: { title?: string; description?: string; dueDate?: string }) => Promise<void>;
@@ -19,6 +21,8 @@ interface MilestoneListProps {
 export function MilestoneList({
   milestones,
   canManage,
+  status,
+  isArchived,
   onToggleComplete,
   onCreateMilestone,
   onUpdateMilestone,
@@ -27,6 +31,19 @@ export function MilestoneList({
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
+  const getLockedMessage = () => {
+    if (isArchived) {
+      return 'Milestones are locked because the project is archived.';
+    }
+    if (status === 'PENDING_REVIEW') {
+      return 'Milestones are locked while the project is pending review.';
+    }
+    if (status === 'COMPLETED') {
+      return 'Milestones are locked because the project is completed.';
+    }
+    return 'Only team members can edit milestones.';
+  };
 
   // Form states
   const [title, setTitle] = useState('');
@@ -119,7 +136,7 @@ export function MilestoneList({
         <div className="mb-4 p-2.5 rounded-md bg-sidebar border border-border/60 flex items-start gap-2 text-xs text-text-muted">
           <AlertCircle className="w-4 h-4 shrink-0 text-text-muted mt-0.5" />
           <span>
-            Milestones cannot be modified while the project is pending review, completed, or archived.
+            {getLockedMessage()}
           </span>
         </div>
       )}

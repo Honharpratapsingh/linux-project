@@ -6,6 +6,7 @@ import { ProgressBar } from '../ProgressBar';
 import { ConfirmDialog } from '../ConfirmDialog';
 import { Pagination } from '../Pagination';
 import { ProjectStatus } from '../../../types/api';
+import { formatStatusLabel } from '../../../lib/status';
 
 describe('Shared UI Components', () => {
   describe('StatusBadge', () => {
@@ -22,7 +23,7 @@ describe('Shared UI Components', () => {
       it(`renders text and class for status ${status}`, () => {
         render(<StatusBadge status={status} />);
         const badge = screen.getByTestId(`badge-${status}`);
-        expect(badge).toHaveTextContent(status);
+        expect(badge).toHaveTextContent(formatStatusLabel(status));
         expect(badge.className).toContain(expectedClass);
       });
     });

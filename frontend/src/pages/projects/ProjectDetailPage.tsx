@@ -341,6 +341,8 @@ export default function ProjectDetailPage() {
           <MilestoneList
             milestones={milestones}
             canManage={permissions.canManageMilestones}
+            status={project.status}
+            isArchived={Boolean(project.archivedAt)}
             onToggleComplete={handleToggleComplete}
             onCreateMilestone={handleCreateMilestone}
             onUpdateMilestone={handleUpdateMilestone}
@@ -416,9 +418,9 @@ export default function ProjectDetailPage() {
               {/* canReject: Reject */}
               {permissions.canReject && (
                 <Button
-                  variant="danger"
+                  variant="outline"
                   size="md"
-                  className="w-full"
+                  className="w-full bg-surface border border-error text-error hover:bg-error/10 hover:border-error"
                   onClick={() => setActiveDialog('REJECT')}
                   icon={<XCircle className="w-4 h-4" />}
                 >
@@ -668,6 +670,7 @@ export default function ProjectDetailPage() {
         description="Rejecting the proposal marks it as REJECTED. You must provide a clear reason for the rejection."
         confirmLabel="Reject Project"
         variant="danger"
+        confirmClassName="bg-surface border border-error text-error hover:bg-error/10 hover:border-error"
         loading={actionLoading}
         showMessageInput
         requireMessage
