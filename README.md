@@ -49,11 +49,25 @@ npm run dev:frontend
 
 ## Running Tests
 
+### Unit & Integration Suite
 To run the complete test suite against the local test database without hardcoded credentials in source files, pass the test database URL in the environment:
 
 ```bash
 TEST_DATABASE_URL=postgresql://projecthub:projecthub@localhost:5432/projecthub_test npm test
 ```
+
+### Phase 4 — End-to-End (E2E) Browser Suite
+The end-to-end suite uses Playwright to drive real browser interactions through complete student and faculty capstone workflows against a dedicated test database (`projecthub_e2e`). Playwright automatically spins up the backend API on port 5002 and the Vite frontend dev server on port 5175.
+
+```bash
+# Run the complete E2E test suite (auto-prepares, seeds, and runs tests)
+E2E_DATABASE_URL="postgresql://projecthub:projecthub@localhost:5432/projecthub_e2e" E2E_PASSWORD="<password>" npm run e2e
+
+# Or prepare/reset the E2E database independently
+E2E_DATABASE_URL="postgresql://projecthub:projecthub@localhost:5432/projecthub_e2e" E2E_PASSWORD="<password>" npm run e2e:prepare
+```
+
+**Safety Invariant**: The migration and seeding harness strictly refuses to truncate or run against any database whose name does not end in `_e2e`, protecting dev and test databases from accidental modification.
 
 ## CLI Scripts
 
