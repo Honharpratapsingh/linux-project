@@ -28,6 +28,7 @@ services:
       dockerfile: backend/Containerfile
     restart: unless-stopped
     environment:
+      HOST: "0.0.0.0"
       DATABASE_URL: postgresql://${POSTGRES_USER:?POSTGRES_USER is required}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:?POSTGRES_DB is required}
       SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET is required}
       PORT: "5000"

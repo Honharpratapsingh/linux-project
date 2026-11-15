@@ -174,3 +174,64 @@ describe('server startup — RUN_MIGRATIONS_ON_START', () => {
     migrateSpy.mockRestore();
   });
 });
+
+describe('server startup — HOST bind address', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    delete process.env.HOST;
+  });
+
+  afterEach(() => {
+    delete process.env.HOST;
+  });
+
+  it('defaults bind host to 127.0.0.1 when process.env.HOST is not set', async () => {
+    delete process.env.HOST;
+    const mockRelease = vi.fn();
+    const mockPool = {
+      connect: vi.fn().mockResolvedValue({ release: mockRelease }),
+      end: vi.fn().mockResolvedValue(undefined),
+    } as unknown as Pool;
+
+    const mockServer = { close: vi.fn((cb?: () => void) => cb && cb()) };
+    const listenSpy = vi.spyOn(app, 'listen').mockImplementation((...args: any[]) => {
+      const cb = args[args.length - 1];
+      if (typeof cb === 'function') cb();
+      return mockServer as any;
+    });
+
+    await startServer(mockPool);
+
+    expect(listenSpy).toHaveBeenCalledWith(
+      expect.any(Number),
+      '127.0.0.1',
+      expect.any(Function)
+    );
+    listenSpy.mockRestore();
+  });
+
+  it('respects process.env.HOST when set (e.g. 0.0.0.0 in container)', async () => {
+    process.env.HOST = '0.0.0.0';
+    const mockRelease = vi.fn();
+    const mockPool = {
+      connect: vi.fn().mockResolvedValue({ release: mockRelease }),
+      end: vi.fn().mockResolvedValue(undefined),
+    } as unknown as Pool;
+
+    const mockServer = { close: vi.fn((cb?: () => void) => cb && cb()) };
+    const listenSpy = vi.spyOn(app, 'listen').mockImplementation((...args: any[]) => {
+      const cb = args[args.length - 1];
+      if (typeof cb === 'function') cb();
+      return mockServer as any;
+    });
+
+    await startServer(mockPool);
+
+    expect(listenSpy).toHaveBeenCalledWith(
+      expect.any(Number),
+      '0.0.0.0',
+      expect.any(Function)
+    );
+    listenSpy.mockRestore();
+  });
+});

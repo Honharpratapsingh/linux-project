@@ -230,3 +230,33 @@ podman build --platform linux/amd64,linux/arm64 \
 podman manifest push --all ghcr.io/<NAMESPACE>/projecthub-backend:v1.0.0 docker://ghcr.io/<NAMESPACE>/projecthub-backend:v1.0.0
 podman manifest push --all ghcr.io/<NAMESPACE>/projecthub-frontend:v1.0.0 docker://ghcr.io/<NAMESPACE>/projecthub-frontend:v1.0.0
 ```
+
+---
+
+## 10. Reset to a Clean Demo State (Destructive)
+
+> **WARNING — DESTRUCTIVE OPERATION**: Running `down -v` destroys the PostgreSQL named volume (`projecthub-pgdata`) and wipes all persistent database data.
+
+```bash
+# 1. Tear down the stack and remove persistent database volume [VERIFIED]
+podman compose --env-file .env.compose down -v
+
+# 2. Recreate containers, network, and empty named volume [VERIFIED]
+podman compose --env-file .env.compose up -d
+
+# 3. Wait for all containers to reach healthy status [VERIFIED]
+podman compose --env-file .env.compose ps
+
+# 4. Provision a new faculty account [VERIFIED]
+podman exec \
+  -e FACULTY_NAME="Dr. Rajesh Sharma" \
+  -e FACULTY_EMAIL="sharma@demo.projecthub.test" \
+  -e FACULTY_PASSWORD="demo-password-here" \
+  projecthub-backend node dist/scripts/provisionFaculty.js
+
+# 5. Seed the full demo dataset across all workflow states [VERIFIED]
+podman exec \
+  -e DEMO_SEED_PASSWORD="demo-password-here" \
+  -e ALLOW_DEMO_SEED=true \
+  projecthub-backend node dist/scripts/seedDemo.js
+```

@@ -11,11 +11,11 @@ Course: 21CSE216P (Linux and Container Technologies)
 | npm | 10.9.8 | ✅ Available |
 | git | 2.54.0 | ✅ Available |
 | PostgreSQL 16 (`postgresql@16`) | 16.16 | ✅ Installed & Running locally |
-| Podman | — | ❌ Not installed (Blocked) |
-| Podman Compose probe | — | ❌ Blocked |
-| `scripts/dev-db.sh` | — | ⚠️ Authored, execution Blocked (no Podman) |
+| Podman | 6.2.0 (libkrun, rootless) | ✅ Installed & Verified |
+| Podman Compose | 1.6.0 (external provider) | ✅ Probed & Verified |
+| `scripts/dev-db.sh` | — | ✅ Authored |
 
-> **Note:** Podman is not installed on this machine; container audits and Compose probes are marked as **Blocked**. Development currently uses local PostgreSQL 16 managed via Homebrew services on port 5432 with databases `projecthub_dev` and `projecthub_test`.
+> **Note:** Development PostgreSQL 16 is managed via Homebrew services on port 5432 with databases `projecthub_dev`, `projecthub_test`, and `projecthub_e2e`. Production stack runs via Podman containers on port 3000.
 
 ### Port Configuration Notice
 On macOS, port 5000 is occupied by the native AirPlay Receiver service (`ControlCenter` listening on `*:5000`). For local host development, the backend development server runs on `PORT=5001`. The Vite frontend dev server proxies `/api` requests to `VITE_API_PROXY_TARGET` (defaulting to `http://127.0.0.1:5001`). The backend configuration (`backend/src/config/env.ts`) default port and all documented container runtime ports remain 5000.
@@ -118,3 +118,67 @@ See [docs/API_CONTRACT.md](file:///Users/honharsingh/Documents/linux-project/doc
   - CSRF: `GET /api/auth/csrf` issues session token; header `X-CSRF-Token` verified with `crypto.timingSafeEqual` on all mutation requests (`POST`, `PATCH`, `PUT`, `DELETE`). `Origin` header validated against `ALLOWED_ORIGINS`.
   - Rate Limiting: Login strict (5 failed per 15 min per IP+email), login loose (50 failed per 15 min per IP), registration (10/hr per IP), student search (30/min per user), password change (5 per 15 min per user).
   - Transactions: All state-changing project, workflow, team, milestone, and feedback operations execute inside PostgreSQL transactions using `SELECT ... FROM projects WHERE id = $1 AND deleted_at IS NULL FOR UPDATE` project row locks to guarantee concurrency safety.
+
+---
+
+## Phase 5 — Podman Containerization (Production Stack)
+
+ProjectHub runs as three isolated Podman containers communicating over a dedicated internal bridge network (`projecthub-net`) with a named persistent volume (`projecthub-pgdata`):
+
+| Container | Image | Role | Ports | Healthcheck |
+|-----------|-------|------|-------|-------------|
+| `projecthub-frontend` | `localhost/projecthub-frontend:v1.0.0` (based on `docker.io/library/nginx:1.30.6-alpine`) | Reverse proxy, static asset server, SPA router, dynamic DNS resolver | `127.0.0.1:3000:80` (only published port) | `wget -qO- http://127.0.0.1/` (interval 5s, retries 5) |
+| `projecthub-backend` | `localhost/projecthub-backend:v1.0.0` (based on `docker.io/library/node:22.23.5-bookworm-slim`) | Express API, database migrations on start, non-root `node` user | None (internal `5000/tcp`) | Node HTTP GET `/api/health` (interval 5s, retries 10) |
+| `projecthub-db` | `docker.io/library/postgres:16` | PostgreSQL 16 database with persistent storage in `projecthub-pgdata` | None (internal `5432/tcp`) | `pg_isready` (interval 5s, retries 5) |
+
+### Architecture and Design Highlights
+
+1. **Host Binding and Dev Safety**:
+   - In development, the backend defaults to `HOST=127.0.0.1`, preventing local dev servers from being reachable on the LAN and avoiding port 5000 collisions with macOS AirPlay.
+   - In container runtime, `compose.yaml` explicitly injects `HOST=0.0.0.0` so the backend listens across the container network.
+2. **Dynamic Upstream Resolution in Nginx**:
+   - Nginx uses a variable-based upstream proxy (`set $backend_upstream http://backend:5000; proxy_pass $backend_upstream;`) combined with a dynamic DNS resolver (`resolver __RESOLVER__ valid=5s ipv6=off;`).
+   - At container startup, `/docker-entrypoint.d/99-resolver.sh` reads the container nameserver from `/etc/resolv.conf` (Podman Netavark gateway `10.89.0.1`) and configures Nginx dynamically. This eliminates stale-IP 502 errors when the backend container restarts.
+3. **Startup Resilience and Automatic Migrations**:
+   - The backend runs a bounded retry loop (30 attempts, 2-second interval) waiting for PostgreSQL before listening.
+   - When `RUN_MIGRATIONS_ON_START=true`, database migrations automatically execute under an advisory lock before starting the HTTP server.
+4. **Non-Root & Zero-Secret Security**:
+   - Backend runtime executes under non-root `USER node` (`uid=1000`).
+   - Production images contain zero `.env` files and omit all development dependencies (`typescript`, `vitest`, `ts-node`, `tsx`).
+   - Secrets (`POSTGRES_PASSWORD`, `SESSION_SECRET`) are loaded exclusively via environment variables from `.env.compose` (git-ignored).
+
+### Security Notes: Client IP Collapsing in Rootless Podman
+Under macOS and rootless Podman (libkrun VM with Netavark + pasta port forwarding), incoming host connections to published ports are translated through the container network gateway interface (`10.89.0.x`).
+- **Impact**: Nginx logs and the backend see incoming client requests originating from the gateway IP address (`10.89.0.x`), effectively collapsing external client IPs at the port-forwarding boundary.
+- **Rate-Limiter Invariant**: The coarse per-IP ceiling (`RATE_LIMIT_LOGIN_LOOSE_MAX`) is shared across connections arriving through that gateway. However, the primary brute-force defense — the strict login limiter (`RATE_LIMIT_LOGIN_STRICT_MAX`, 5 failed attempts per 15 min) — is keyed by both IP and email (`ip:email`), ensuring individual user accounts remain strictly isolated from one another.
+
+### Verified Podman Operations
+
+```bash
+# 1. Configure environment secrets
+cp .env.compose.example .env.compose
+# Fill with strong alphanumeric secrets (openssl rand -base64 32 | tr -dc 'a-zA-Z0-9' | head -c 32)
+
+# 2. Build images
+podman compose --env-file .env.compose build
+
+# 3. Start the entire container stack
+podman compose --env-file .env.compose up -d
+
+# 4. Check stack health (all services report healthy)
+podman compose --env-file .env.compose ps
+
+# 5. Access the application in your browser
+open http://localhost:3000
+
+# 6. Seed demo dataset inside running stack
+podman exec -e DEMO_SEED_PASSWORD="<password>" -e ALLOW_DEMO_SEED=true projecthub-backend node dist/scripts/seedDemo.js
+
+# 7. Run E2E Playwright test suite against the containers
+E2E_BASE_URL="http://localhost:3000" E2E_PASSWORD="<password>" npm run e2e
+
+# 8. Stop stack (preserves persistent volume)
+podman compose --env-file .env.compose down
+```
+
+For the comprehensive command reference including inspections, individual lifecycle commands, and plain Podman equivalents, see [docs/podman-commands.md](file:///Users/honharsingh/Documents/linux-project/docs/podman-commands.md).

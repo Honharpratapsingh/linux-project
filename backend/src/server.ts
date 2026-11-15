@@ -5,7 +5,7 @@ import { runMigrations } from './db/migrate';
 import { Pool } from 'pg';
 import http from 'http';
 
-const HOST = process.env.HOST || '0.0.0.0';
+const HOST = process.env.HOST || '127.0.0.1';
 
 export const MAX_ATTEMPTS = 30;
 export const RETRY_DELAY_MS = 2000;
@@ -46,8 +46,9 @@ export async function startServer(targetPool: Pool = defaultPool): Promise<http.
     }
   }
 
-  const server = app.listen(env.PORT, HOST, () => {
-    console.log(`[server] Backend listening on http://${HOST}:${env.PORT} (${env.NODE_ENV})`);
+  const bindHost = process.env.HOST || '127.0.0.1';
+  const server = app.listen(env.PORT, bindHost, () => {
+    console.log(`[server] Backend listening on http://${bindHost}:${env.PORT} (${env.NODE_ENV})`);
   });
 
   function shutdown(signal: string) {

@@ -1,5 +1,5 @@
 # ── Stage 1: Builder ──────────────────────────────────────────────────────────
-FROM docker.io/library/node:22.14.0-bookworm-slim AS builder
+FROM docker.io/library/node:22.23.5-bookworm-slim AS builder
 
 WORKDIR /build
 
@@ -19,7 +19,7 @@ COPY backend/tsconfig.json ./backend/
 RUN npm run build --workspace=backend
 
 # ── Stage 2: Production Runtime ───────────────────────────────────────────────
-FROM docker.io/library/node:22.14.0-bookworm-slim
+FROM docker.io/library/node:22.23.5-bookworm-slim
 
 WORKDIR /app
 
