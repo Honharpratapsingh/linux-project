@@ -7,3 +7,7 @@ build/
 coverage/
 *.log
 .nyc_output/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
