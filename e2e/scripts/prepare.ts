@@ -53,7 +53,7 @@ export async function prepareE2EDatabase(): Promise<void> {
       TRUNCATE TABLE 
         session,
         project_feedback,
-        project_history,
+        project_status_history,
         milestones,
         project_members,
         projects,
