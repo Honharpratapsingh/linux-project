@@ -75,6 +75,10 @@ export async function prepareE2EDatabase(): Promise<void> {
 }
 
 if (require.main === module) {
+  if (process.env.E2E_BASE_URL) {
+    console.log('[e2e:prepare] E2E_BASE_URL set — skipping local database prepare step');
+    process.exit(0);
+  }
   prepareE2EDatabase().catch((err) => {
     console.error('[e2e:prepare] FAILED:', err.message);
     process.exit(1);

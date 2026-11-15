@@ -1,0 +1,40 @@
+# ── Stage 1: Build Frontend ───────────────────────────────────────────────────
+FROM docker.io/library/node:22.14.0-bookworm-slim AS builder
+
+WORKDIR /build
+
+# Copy root lockfile and workspace package manifests
+COPY package.json package-lock.json ./
+COPY backend/package.json ./backend/
+COPY frontend/package.json ./frontend/
+
+# Install dependencies
+RUN npm ci
+
+# Copy frontend source and configuration
+COPY frontend/src ./frontend/src
+COPY frontend/public ./frontend/public
+COPY frontend/index.html ./frontend/
+COPY frontend/tsconfig.json ./frontend/
+COPY frontend/tsconfig.node.json ./frontend/
+COPY frontend/vite.config.ts ./frontend/
+COPY frontend/postcss.config.js ./frontend/
+COPY frontend/tailwind.config.js ./frontend/
+
+# Build production bundle with Vite
+RUN npm run build --workspace=frontend
+
+# ── Stage 2: Serve with Nginx ─────────────────────────────────────────────────
+FROM docker.io/library/nginx:1.27.4-alpine
+
+# Copy built static assets to nginx html root
+COPY --from=builder /build/frontend/dist /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy dynamic DNS resolver script into official entrypoint directory
+COPY frontend/entrypoint.sh /docker-entrypoint.d/99-resolver.sh
+RUN chmod +x /docker-entrypoint.d/99-resolver.sh
+
+EXPOSE 80
