@@ -1,50 +1,139 @@
-@import '@fontsource/geist-sans';
-@import '@fontsource/newsreader';
+@import '@fontsource-variable/fraunces/wght.css';
+@import '@fontsource-variable/fraunces/wght-italic.css';
+@import '@fontsource-variable/space-grotesk/wght.css';
+@import '@fontsource/space-mono/latin.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #FAF8F3;
+  /* Maximalist Editorial Core Tokens */
+  --ink: #1B1410;
+  --paper: #FFF1D6;
+  --paper-dark: #EFE3C8;
   --surface: #FFFFFF;
-  --sidebar: #F5F0E8;
-  --primary: #554637;
-  --primary-hover: #43372C;
-  --text: #292722;
-  --text-secondary: #75695F;
-  --text-muted: #8C8073;
-  --border: #E8E1D7;
-  --divider: #EEE9E2;
-  --sage: #DCE8DE;
-  --lavender: #E9DFF1;
-  --blue: #DDE8F1;
-  --peach: #F3DFD3;
-  --error: #A33F3F;
-  --focus: #7B6855;
+  --primary: #C8381A;
+  --primary-hover: #A82D13;
+  --marigold: #FFB627;
+  --marigold-tint: #FFD166;
+  --teal: #14A38B;
+  --violet: #7A4DE0;
+  --violet-tint: #D9C8FF;
+  --pink: #FF6FAE;
+  --sky: #3DA5F4;
+  --sky-tint: #A9D8FF;
+  --lime: #C6E03B;
+  --coral: #FF8A80;
+  --error: #B3261E;
+
+  /* Remapped Existing Tokens for Compatibility */
+  --background: var(--paper);
+  --sidebar: var(--ink);
+  --text: var(--ink);
+  --text-secondary: #463B34;
+  --text-muted: #554840;
+  --border: var(--ink);
+  --divider: var(--ink);
+  --sage: var(--lime);
+  --lavender: var(--violet-tint);
+  --blue: var(--sky-tint);
+  --peach: var(--marigold-tint);
+  --focus: var(--violet);
+
+  /* Hard Shadows */
+  --shadow-hard-card: 5px 5px 0 0 #1B1410;
+  --shadow-hard-card-hover: 7px 7px 0 0 #1B1410;
+  --shadow-hard-btn: 3px 3px 0 0 #1B1410;
+  --shadow-hard-active: 1px 1px 0 0 #1B1410;
+  --shadow-hard-sticker: 2px 2px 0 0 #1B1410;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--text);
-  font-family: 'Geist Sans', sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'Space Grotesk Variable', 'Space Grotesk', sans-serif;
+  background-image: radial-gradient(rgba(27, 20, 16, 0.12) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  background-position: 0 0;
+  min-height: 100vh;
 }
 
+/* Hard Shadows and Press Transitions */
+.card-hard {
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: 5px 5px 0 0 var(--ink);
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+}
+
+.card-hard:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 0 var(--ink);
+}
+
+.card-hard-static {
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: 5px 5px 0 0 var(--ink);
+}
+
+.btn-hard {
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 0 var(--ink);
+  transition: transform 120ms ease-out, box-shadow 120ms ease-out;
+}
+
+.btn-hard:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 var(--ink);
+}
+
+.btn-hard:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--ink);
+}
+
+/* CSS Patterns */
+.pattern-stripes-marigold {
+  background-image: repeating-linear-gradient(45deg, #FFB627, #FFB627 8px, #1B1410 8px, #1B1410 16px);
+}
+
+.pattern-stripes-primary {
+  background-image: repeating-linear-gradient(-45deg, #C8381A, #C8381A 6px, #FFF1D6 6px, #FFF1D6 12px);
+}
+
+.pattern-stripes-progress {
+  background-image: repeating-linear-gradient(45deg, #C8381A, #C8381A 8px, #FFB627 8px, #FFB627 16px);
+}
+
+.pattern-checker {
+  background-image: conic-gradient(#1B1410 90deg, #FFF1D6 90deg 180deg, #1B1410 180deg 270deg, #FFF1D6 270deg);
+  background-size: 16px 16px;
+}
+
+/* Page fade-in */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
   animation: fadeIn 150ms ease-out;
 }
 
-.animate-slide-up {
-  animation: slideUp 180ms ease-out;
+/* Reduced Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    transform: none !important;
+  }
+  .card-hard:hover,
+  .btn-hard:hover,
+  .btn-hard:active {
+    transform: none !important;
+  }
 }
-

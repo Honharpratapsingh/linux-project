@@ -22,29 +22,29 @@ export function Pagination({
 
   return (
     <div
-      className={`flex items-center justify-between border-t border-divider px-3 py-3 sm:px-4 text-xs text-text-secondary ${className}`}
+      className={`flex items-center justify-between border-t-2 border-ink px-4 py-3 bg-paper text-xs font-mono text-text-secondary ${className}`}
       aria-label="Pagination Navigation"
     >
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[11px]">
         <span>Showing</span>
-        <span className="font-medium text-text">
+        <span className="text-ink">
           {Math.min(total, (page - 1) * pageSize + 1)}
         </span>
         <span>to</span>
-        <span className="font-medium text-text">
+        <span className="text-ink">
           {Math.min(total, page * pageSize)}
         </span>
         <span>of</span>
-        <span className="font-medium text-text">{total}</span>
+        <span className="text-ink">{total}</span>
         <span>results</span>
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="hidden sm:inline-block">
-          Page <span className="font-medium text-text">{page}</span> of{' '}
-          <span className="font-medium text-text">{totalPages}</span>
+        <span className="hidden sm:inline-block font-bold uppercase tracking-wider text-[11px]">
+          Page <span className="text-ink">{page}</span> of{' '}
+          <span className="text-ink">{totalPages}</span>
         </span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <Button
             variant="outline"
             size="sm"

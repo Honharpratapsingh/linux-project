@@ -113,44 +113,49 @@ export default function ProfilePage() {
       />
 
       {/* Account Info (Read-only email & role) */}
-      <div className="bg-surface border border-border rounded-xl p-6 sm:p-7 shadow-xs">
-        <h3 className="font-serif text-lg font-semibold text-text mb-4 flex items-center gap-2">
-          <Shield className="w-4 h-4 text-primary" /> Role & Account Information
+      <div className="card-hard-static bg-white p-6 sm:p-7">
+        <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-violet-tint text-ink">
+          ACCOUNT CREDENTIALS
+        </span>
+        <h3 className="font-display font-bold text-xl text-ink mb-4 flex items-center gap-2">
+          <Shield className="w-5 h-5 text-primary stroke-[2.5]" /> Role & Account Information
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
-          <div className="p-3 rounded-lg bg-sidebar border border-border/60">
-            <span className="text-text-muted flex items-center gap-1.5 mb-1">
-              <Mail className="w-3.5 h-3.5" /> Email Address (Read-only)
+          <div className="p-3.5 rounded-[10px] bg-paper border-2 border-ink shadow-[2px_2px_0_0_#1B1410]">
+            <span className="text-text-muted font-mono uppercase tracking-wider text-[11px] font-bold flex items-center gap-1.5 mb-1">
+              <Mail className="w-3.5 h-3.5 text-ink" /> Email Address (Read-only)
             </span>
-            <span className="font-medium text-sm text-text block truncate">
+            <span className="font-bold text-sm text-ink block truncate">
               {user.email}
             </span>
           </div>
 
-          <div className="p-3 rounded-lg bg-sidebar border border-border/60">
-            <span className="text-text-muted flex items-center gap-1.5 mb-1">
-              <Shield className="w-3.5 h-3.5" /> Account Role (Read-only)
+          <div className="p-3.5 rounded-[10px] bg-paper border-2 border-ink shadow-[2px_2px_0_0_#1B1410]">
+            <span className="text-text-muted font-mono uppercase tracking-wider text-[11px] font-bold flex items-center gap-1.5 mb-1">
+              <Shield className="w-3.5 h-3.5 text-ink" /> Account Role (Read-only)
             </span>
-            <span className="font-semibold text-sm text-primary uppercase block">
+            <span className="font-display font-black text-sm text-primary uppercase block">
               {user.role}
             </span>
           </div>
 
           {user.registrationNumber && (
-            <div className="p-3 rounded-lg bg-sidebar border border-border/60">
-              <span className="text-text-muted block mb-1">
+            <div className="p-3.5 rounded-[10px] bg-paper border-2 border-ink shadow-[2px_2px_0_0_#1B1410]">
+              <span className="text-text-muted font-mono uppercase tracking-wider text-[11px] font-bold block mb-1">
                 Registration Number
               </span>
-              <span className="font-medium text-sm text-text block">
+              <span className="font-mono font-bold text-sm text-ink block">
                 {user.registrationNumber}
               </span>
             </div>
           )}
 
-          <div className="p-3 rounded-lg bg-sidebar border border-border/60">
-            <span className="text-text-muted block mb-1">Member Since</span>
-            <span className="font-medium text-sm text-text block">
+          <div className="p-3.5 rounded-[10px] bg-paper border-2 border-ink shadow-[2px_2px_0_0_#1B1410]">
+            <span className="text-text-muted font-mono uppercase tracking-wider text-[11px] font-bold block mb-1">
+              Member Since
+            </span>
+            <span className="font-mono font-bold text-sm text-ink block">
               {formatDate(user.createdAt)}
             </span>
           </div>
@@ -158,16 +163,19 @@ export default function ProfilePage() {
       </div>
 
       {/* Change Name Form */}
-      <div className="bg-surface border border-border rounded-xl p-6 sm:p-7 shadow-xs">
-        <h3 className="font-serif text-lg font-semibold text-text mb-1 flex items-center gap-2">
-          <UserIcon className="w-4 h-4 text-text-muted" /> Update Profile Name
+      <div className="card-hard-static bg-white p-6 sm:p-7">
+        <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-marigold text-ink">
+          PROFILE SETTINGS
+        </span>
+        <h3 className="font-display font-bold text-xl text-ink mb-1 flex items-center gap-2">
+          <UserIcon className="w-5 h-5 text-text-muted stroke-[2.5]" /> Update Profile Name
         </h3>
         <p className="font-sans text-xs text-text-secondary mb-4">
           Your full name appears on all created projects, milestone reviews, and team listings.
         </p>
 
         {nameError && (
-          <div className="mb-4 p-2.5 rounded bg-error/10 text-xs text-error font-sans">
+          <div className="mb-4 p-3 rounded-lg bg-error/10 border-2 border-error text-xs font-mono font-bold text-error">
             {nameError}
           </div>
         )}
@@ -196,16 +204,19 @@ export default function ProfilePage() {
       </div>
 
       {/* Change Password Form */}
-      <div className="bg-surface border border-border rounded-xl p-6 sm:p-7 shadow-xs">
-        <h3 className="font-serif text-lg font-semibold text-text mb-1 flex items-center gap-2">
-          <Lock className="w-4 h-4 text-text-muted" /> Change Password
+      <div className="card-hard-static bg-white p-6 sm:p-7">
+        <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-coral text-ink">
+          SECURITY SETTINGS
+        </span>
+        <h3 className="font-display font-bold text-xl text-ink mb-1 flex items-center gap-2">
+          <Lock className="w-5 h-5 text-text-muted stroke-[2.5]" /> Change Password
         </h3>
-        <p className="font-sans text-xs text-text-secondary mb-4">
+        <p className="font-sans text-xs text-text-secondary mb-4 leading-relaxed">
           Updating your password will immediately terminate all your other active sessions while keeping your current session active.
         </p>
 
         {passwordError && (
-          <div className="mb-4 p-2.5 rounded bg-error/10 text-xs text-error font-sans">
+          <div className="mb-4 p-3 rounded-lg bg-error/10 border-2 border-error text-xs font-mono font-bold text-error">
             {passwordError}
           </div>
         )}
@@ -238,7 +249,7 @@ export default function ProfilePage() {
               variant="primary"
               size="md"
               loading={submittingPassword}
-              icon={<Lock className="w-4 h-4" />}
+              icon={<CheckCircle2 className="w-4 h-4" />}
             >
               Update Password
             </Button>

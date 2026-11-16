@@ -15,7 +15,8 @@
     "seed:demo": "npm run seed:demo --workspace=backend",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "e2e:prepare": "tsx e2e/scripts/prepare.ts",
-    "e2e": "npm run e2e:prepare && playwright test --config=e2e/playwright.config.ts"
+    "e2e": "npm run e2e:prepare && playwright test --config=e2e/playwright.config.ts",
+    "e2e:screens": "npm run e2e:prepare && tsx e2e/scripts/captureScreens.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.65.1"

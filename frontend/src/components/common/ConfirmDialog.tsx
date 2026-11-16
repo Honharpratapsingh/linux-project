@@ -79,16 +79,19 @@ export function ConfirmDialog({
       aria-modal="true"
       aria-labelledby="dialog-title"
       aria-describedby="dialog-description"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text/40 backdrop-blur-xs animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 animate-fade-in"
     >
       <div
         ref={dialogRef}
-        className="bg-surface border border-border rounded-lg shadow-lg max-w-md w-full p-6 text-left"
+        className="card-hard-static bg-white border-2 border-ink rounded-[12px] shadow-[7px_7px_0_0_#1B1410] max-w-md w-full p-6 text-left"
       >
-        <h3 id="dialog-title" className="font-serif text-xl font-semibold text-text mb-2">
+        <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-marigold text-ink">
+          CONFIRMATION
+        </span>
+        <h3 id="dialog-title" className="font-display font-black text-2xl text-ink mb-2 tracking-tight">
           {title}
         </h3>
-        <p id="dialog-description" className="font-sans text-sm text-text-secondary mb-4">
+        <p id="dialog-description" className="font-sans text-sm text-text-secondary mb-4 leading-relaxed">
           {description}
         </p>
 
@@ -106,11 +109,12 @@ export function ConfirmDialog({
                 error={messageError}
                 rows={3}
                 required={requireMessage}
+                autoFocus
               />
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-2.5 pt-2">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t-2 border-ink">
             <Button
               type="button"
               variant="outline"
@@ -122,11 +126,11 @@ export function ConfirmDialog({
             </Button>
             <Button
               type="submit"
-              variant={confirmClassName ? 'outline' : variant}
+              variant={variant === 'danger' ? 'danger' : 'primary'}
               size="md"
               loading={loading}
+              disabled={Boolean(showMessageInput && requireMessage && !message.trim())}
               className={confirmClassName}
-              disabled={showMessageInput && requireMessage && !message.trim()}
             >
               {confirmLabel}
             </Button>

@@ -15,30 +15,30 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={textareaId}
-            className="block text-xs font-sans font-medium text-text mb-1.5"
+            className="block text-xs font-mono font-bold uppercase tracking-wider text-ink mb-1.5"
           >
             {label}
-            {rest.required && <span className="text-error ml-0.5">*</span>}
+            {rest.required && <span className="text-error ml-1">*</span>}
           </label>
         )}
         <textarea
           ref={ref}
           id={textareaId}
           rows={rows}
-          className={`w-full bg-surface text-text text-sm font-sans px-3 py-2 rounded-md border ${
-            error ? 'border-error focus:ring-error/20' : 'border-border focus:border-focus focus:ring-focus/30'
-          } placeholder:text-text-muted/60 transition-colors duration-150 focus:outline-none focus:ring-2 disabled:bg-sidebar disabled:text-text-muted disabled:cursor-not-allowed resize-y ${className}`}
+          className={`w-full bg-white text-ink text-sm font-sans px-3.5 py-2.5 rounded-[8px] border-2 ${
+            error ? 'border-error' : 'border-ink'
+          } placeholder:text-text-muted/60 transition-all duration-120 focus:outline-none focus:border-violet focus:ring-0 focus:shadow-[0_0_0_2px_#FFF1D6,0_0_0_5px_#7A4DE0] disabled:bg-paper-dark disabled:text-text-muted disabled:cursor-not-allowed resize-y ${className}`}
           aria-invalid={!!error}
           aria-describedby={error ? `${textareaId}-error` : helperText ? `${textareaId}-helper` : undefined}
           {...rest}
         />
         {error && (
-          <p id={`${textareaId}-error`} className="text-xs text-error mt-1 font-sans">
+          <p id={`${textareaId}-error`} className="text-xs text-error mt-1 font-mono font-medium">
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={`${textareaId}-helper`} className="text-xs text-text-muted mt-1 font-sans">
+          <p id={`${textareaId}-helper`} className="text-xs text-text-muted mt-1 font-mono">
             {helperText}
           </p>
         )}

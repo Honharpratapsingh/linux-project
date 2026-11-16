@@ -41,33 +41,38 @@ export function FeedbackThread({
   const getTypeBadgeClass = (type: string) => {
     switch (type) {
       case 'APPROVAL':
-        return 'bg-sage text-text';
+        return 'bg-lime text-ink border-2 border-ink';
       case 'CHANGES_REQUESTED':
-        return 'bg-peach text-text';
+        return 'bg-marigold-tint text-ink border-2 border-ink';
       case 'REJECTION':
-        return 'bg-error/20 text-error';
+        return 'bg-coral text-ink border-2 border-ink';
       default:
-        return 'bg-sidebar text-text-secondary border border-border/60';
+        return 'bg-paper-dark text-ink border-2 border-ink';
     }
   };
 
   return (
-    <div className="bg-surface border border-border rounded-lg p-5 sm:p-6 shadow-xs">
+    <div className="card-hard-static bg-white p-5 sm:p-6 mb-6">
+      <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-sky-tint text-ink">
+        FACULTY FEEDBACK
+      </span>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-serif text-lg font-medium text-text flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-text-muted" /> Faculty Feedback & Review Notes
+          <h3 className="font-display font-bold text-xl text-ink flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-text-muted stroke-[2.5]" /> Faculty Feedback & Review Notes
           </h3>
-          <p className="text-xs text-text-secondary mt-0.5">
+          <p className="text-xs text-text-secondary mt-0.5 font-sans">
             Guidance, evaluation comments, and status revision notes
           </p>
         </div>
-        <span className="text-xs text-text-muted">{feedback.length} entries</span>
+        <span className="font-mono text-xs font-bold text-ink bg-paper-dark border-2 border-ink px-2 py-0.5 rounded-full">
+          {feedback.length} entries
+        </span>
       </div>
 
       {/* Give Feedback Form (Faculty only) */}
       {canGiveFeedback && (
-        <form onSubmit={handleSubmit} className="mb-6 p-4 rounded-lg bg-sidebar/50 border border-border/80">
+        <form onSubmit={handleSubmit} className="mb-6 p-4 rounded-xl bg-paper border-2 border-ink shadow-[3px_3px_0_0_#1B1410]">
           <Textarea
             label="Post Faculty Comment"
             placeholder="Share feedback, advice, or suggestions with the project team..."
@@ -100,23 +105,23 @@ export function FeedbackThread({
           No faculty feedback recorded on this project yet.
         </p>
       ) : (
-        <ul className="divide-y divide-divider">
+        <ul className="divide-y-2 divide-ink">
           {feedback.map((fb) => (
             <li key={fb.id} className="py-3.5 space-y-1.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-sans text-xs font-semibold text-text">
+                  <span className="font-sans text-xs font-bold text-ink">
                     {fb.author.fullName}
                   </span>
                   <span
-                    className={`text-[10px] font-medium tracking-wide uppercase px-2 py-0.5 rounded-full ${getTypeBadgeClass(
+                    className={`font-mono text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded-full ${getTypeBadgeClass(
                       fb.feedbackType
                     )}`}
                   >
                     {fb.feedbackType.replace('_', ' ')}
                   </span>
                 </div>
-                <span className="text-xs text-text-muted font-sans tabular-nums shrink-0">
+                <span className="text-xs text-text-muted font-mono tabular-nums shrink-0">
                   {formatDateTime(fb.createdAt)}
                 </span>
               </div>

@@ -112,11 +112,14 @@ export function MilestoneList({
   };
 
   return (
-    <div className="bg-surface border border-border rounded-lg p-5 sm:p-6 shadow-xs">
+    <div className="card-hard-static bg-white p-5 sm:p-6 mb-6">
+      <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-teal text-white">
+        PROJECT MILESTONES
+      </span>
       <div className="flex items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="font-serif text-lg font-medium text-text">Milestones</h3>
-          <p className="text-xs text-text-secondary mt-0.5">
+          <h3 className="font-display font-bold text-xl text-ink">Milestones</h3>
+          <p className="text-xs text-text-secondary mt-0.5 font-sans">
             Deliverables and checkpoints ({milestones.filter((m) => m.isCompleted).length}/{milestones.length} completed)
           </p>
         </div>
@@ -133,8 +136,8 @@ export function MilestoneList({
       </div>
 
       {!canManage && (
-        <div className="mb-4 p-2.5 rounded-md bg-sidebar border border-border/60 flex items-start gap-2 text-xs text-text-muted">
-          <AlertCircle className="w-4 h-4 shrink-0 text-text-muted mt-0.5" />
+        <div className="mb-4 p-3 rounded-lg bg-paper border-2 border-ink shadow-[2px_2px_0_0_#1B1410] flex items-start gap-2.5 text-xs text-ink font-mono font-medium">
+          <AlertCircle className="w-4 h-4 shrink-0 text-ink mt-0.5" />
           <span>
             {getLockedMessage()}
           </span>
@@ -146,7 +149,7 @@ export function MilestoneList({
           No milestones defined yet. {canManage ? 'Add milestones to track project progress.' : ''}
         </p>
       ) : (
-        <ul className="divide-y divide-divider">
+        <ul className="divide-y-2 divide-ink">
           {milestones.map((m) => (
             <li
               key={m.id}
@@ -159,19 +162,19 @@ export function MilestoneList({
                   type="button"
                   disabled={!canManage}
                   onClick={() => onToggleComplete(m)}
-                  className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                  className={`mt-0.5 w-6 h-6 rounded-md border-2 border-ink shadow-[2px_2px_0_0_#1B1410] flex items-center justify-center shrink-0 transition-all ${
                     m.isCompleted
-                      ? 'bg-primary border-primary text-surface'
-                      : 'border-border bg-surface hover:border-primary'
+                      ? 'bg-lime text-ink'
+                      : 'bg-white hover:bg-paper-dark'
                   } ${!canManage ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                   aria-label={m.isCompleted ? 'Mark incomplete' : 'Mark complete'}
                 >
-                  {m.isCompleted && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                  {m.isCompleted && <Check className="w-4 h-4 stroke-[3]" />}
                 </button>
 
                 <div className="min-w-0">
                   <span
-                    className={`font-sans text-sm font-medium block text-text ${
+                    className={`font-sans text-sm font-bold block text-ink ${
                       m.isCompleted ? 'line-through text-text-secondary' : ''
                     }`}
                   >
@@ -183,8 +186,8 @@ export function MilestoneList({
                     </p>
                   )}
                   {m.dueDate && (
-                    <span className="inline-flex items-center gap-1 text-[11px] text-text-muted mt-1.5">
-                      <Calendar className="w-3 h-3" />
+                    <span className="inline-flex items-center gap-1.5 font-mono text-xs text-text-muted mt-1.5">
+                      <Calendar className="w-3.5 h-3.5" />
                       <span>Due {formatDate(m.dueDate)}</span>
                       {m.completedAt && (
                         <span> &bull; Completed {formatDate(m.completedAt)}</span>
@@ -195,11 +198,11 @@ export function MilestoneList({
               </div>
 
               {canManage && (
-                <div className="flex items-center gap-1 shrink-0 ml-2">
+                <div className="flex items-center gap-1.5 shrink-0 ml-2">
                   <button
                     type="button"
                     onClick={() => openEditModal(m)}
-                    className="p-1.5 text-text-muted hover:text-text rounded hover:bg-sidebar transition-colors"
+                    className="p-1.5 text-ink hover:bg-paper-dark rounded-md border border-transparent hover:border-ink transition-colors"
                     aria-label={`Edit milestone ${m.title}`}
                   >
                     <Edit2 className="w-3.5 h-3.5" />
@@ -207,7 +210,7 @@ export function MilestoneList({
                   <button
                     type="button"
                     onClick={() => setDeleteTargetId(m.id)}
-                    className="p-1.5 text-text-muted hover:text-error rounded hover:bg-error/10 transition-colors"
+                    className="p-1.5 text-error hover:bg-error/10 rounded-md border border-transparent hover:border-error transition-colors"
                     aria-label={`Delete milestone ${m.title}`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -224,15 +227,18 @@ export function MilestoneList({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text/40 backdrop-blur-xs animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 animate-fade-in"
         >
-          <div className="bg-surface border border-border rounded-lg shadow-lg max-w-md w-full p-6 text-left">
-            <h3 className="font-serif text-xl font-semibold text-text mb-4">
+          <div className="card-hard-static bg-white border-2 border-ink rounded-[12px] shadow-[7px_7px_0_0_#1B1410] max-w-md w-full p-6 text-left">
+            <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-teal text-white">
+              MILESTONE EDITOR
+            </span>
+            <h3 className="font-display font-black text-2xl text-ink mb-4">
               {editingMilestone ? 'Edit Milestone' : 'Add Milestone'}
             </h3>
 
             {formError && (
-              <div className="mb-4 p-2.5 rounded bg-error/10 text-xs text-error">
+              <div className="mb-4 p-3 rounded-lg bg-error/10 border-2 border-error text-xs font-mono font-bold text-error">
                 {formError}
               </div>
             )}
@@ -264,7 +270,7 @@ export function MilestoneList({
                 onChange={(e) => setDescription(e.target.value)}
               />
 
-              <div className="flex items-center justify-end gap-2.5 pt-2">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t-2 border-ink">
                 <Button
                   variant="outline"
                   size="md"

@@ -53,25 +53,61 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="w-12 h-12 rounded-xl bg-primary text-surface flex items-center justify-center font-serif text-2xl font-semibold shadow-xs mx-auto mb-3">
-          P
-        </div>
-        <h1 className="font-serif text-3xl font-semibold text-text tracking-tight">
-          Sign in to ProjectHub
-        </h1>
-        <p className="font-sans text-sm text-text-secondary mt-1.5">
-          Student Project Tracking and Review System
-        </p>
-      </div>
+    <div className="min-h-screen bg-paper flex items-center justify-center p-4 sm:p-6 lg:p-10 select-none">
+      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
+        {/* Left Hero Panel (desktop split / mobile stacked above) */}
+        <div className="lg:col-span-5 card-hard-static bg-ink text-paper p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
+          {/* Top branding & decorative shapes */}
+          <div>
+            <div className="flex items-center justify-between gap-3 mb-6">
+              <div className="w-12 h-12 rounded-lg bg-primary text-white border-2 border-paper flex items-center justify-center font-display text-2xl font-black shadow-[3px_3px_0_0_#FFF1D6]">
+                P
+              </div>
+              <span className="font-mono text-xs uppercase tracking-wider font-bold px-2.5 py-1 rounded bg-marigold text-ink border-2 border-ink shadow-[2px_2px_0_0_#000]">
+                PORTAL V1.0
+              </span>
+            </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-surface py-8 px-6 sm:px-8 border border-border rounded-xl shadow-xs">
+            <h2 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-paper tracking-tight leading-none mb-3">
+              ProjectHub
+            </h2>
+            <p className="font-sans text-base text-paper/85 leading-relaxed max-w-sm">
+              Student Project Tracking and Review System
+            </p>
+
+            {/* CSS Stripe pattern strip */}
+            <div className="h-4 w-full pattern-stripes-marigold border-2 border-paper/40 rounded-sm my-6" />
+          </div>
+
+          {/* CSS Decorative geometric shape cluster */}
+          <div className="mt-8 pt-6 border-t-2 border-paper/20 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full border-2 border-paper bg-lime shadow-[2px_2px_0_0_#000] flex items-center justify-center font-mono text-xs font-black text-ink">
+              SRM
+            </div>
+            <div className="font-mono text-xs text-paper/70 uppercase tracking-wider font-bold">
+              Autonomous Capstone Engine
+            </div>
+          </div>
+        </div>
+
+        {/* Right Form Card */}
+        <div className="lg:col-span-7 card-hard-static bg-white p-6 sm:p-10 flex flex-col justify-center">
+          <div className="mb-6">
+            <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-2 bg-marigold text-ink">
+              AUTHENTICATION
+            </span>
+            <h1 className="font-display font-black text-3xl sm:text-4xl text-ink tracking-tight">
+              Sign in to ProjectHub
+            </h1>
+            <p className="font-sans text-sm text-text-secondary mt-1">
+              Student Project Tracking and Review System
+            </p>
+          </div>
+
           {apiError && (
             <div
               role="alert"
-              className="mb-5 p-3 rounded-md bg-error/10 border border-error/20 text-xs sm:text-sm text-error font-sans leading-relaxed animate-fade-in"
+              className="mb-5 p-3.5 rounded-lg bg-error/10 border-2 border-error text-xs sm:text-sm text-error font-mono font-medium leading-relaxed animate-fade-in"
             >
               {apiError}
             </div>
@@ -102,22 +138,19 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 variant="primary"
-                size="md"
+                size="lg"
                 loading={isSubmitting}
-                className="w-full"
+                className="w-full font-bold uppercase tracking-wider text-sm"
               >
-                Sign In
+                Sign in
               </Button>
             </div>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-divider text-center text-xs text-text-secondary">
-            <span>Don&apos;t have an account? </span>
-            <Link
-              to="/register"
-              className="text-primary font-medium hover:underline transition-colors"
-            >
-              Register as Student
+          <div className="mt-6 pt-5 border-t-2 border-ink text-center text-sm font-sans text-text-secondary">
+            Don't have an account?{' '}
+            <Link to="/register" className="font-bold text-primary hover:underline font-mono uppercase tracking-wider text-xs">
+              Create an account &rarr;
             </Link>
           </div>
         </div>

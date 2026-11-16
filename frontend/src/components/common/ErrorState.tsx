@@ -16,12 +16,12 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div
-      className={`bg-surface border border-error/20 rounded-lg p-6 sm:p-8 text-center flex flex-col items-center justify-center max-w-md mx-auto my-6 ${className}`}
+      className={`card-hard-static bg-white border-2 border-error p-6 sm:p-8 text-center flex flex-col items-center justify-center max-w-md mx-auto my-6 shadow-[5px_5px_0_0_#B3261E] ${className}`}
     >
-      <div className="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center text-error mb-3">
-        <AlertCircle className="w-5 h-5" />
+      <div className="w-12 h-12 rounded-xl bg-error/15 border-2 border-error flex items-center justify-center text-error mb-3 shadow-[2px_2px_0_0_#B3261E]">
+        <AlertCircle className="w-6 h-6 stroke-[2.5]" />
       </div>
-      <h3 className="font-serif text-lg font-medium text-text mb-1">{title}</h3>
+      <h3 className="font-display font-black text-xl text-ink mb-1">{title}</h3>
       <p className="font-sans text-sm text-text-secondary mb-4">{message}</p>
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry}>

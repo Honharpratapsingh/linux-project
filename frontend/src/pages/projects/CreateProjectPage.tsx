@@ -94,11 +94,15 @@ export default function CreateProjectPage() {
         }
       />
 
-      <div className="bg-surface border border-border rounded-xl p-6 sm:p-8 shadow-xs">
+      <div className="card-hard-static bg-white p-6 sm:p-8">
+        <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-4 bg-marigold text-ink">
+          PROJECT PROPOSAL FORM
+        </span>
+
         {apiError && (
           <div
             role="alert"
-            className="mb-5 p-3 rounded-md bg-error/10 border border-error/20 text-xs sm:text-sm text-error font-sans leading-relaxed animate-fade-in"
+            className="mb-5 p-3.5 rounded-lg bg-error/10 border-2 border-error text-xs sm:text-sm text-error font-mono font-bold leading-relaxed animate-fade-in"
           >
             {apiError}
           </div>
@@ -135,7 +139,7 @@ export default function CreateProjectPage() {
               {...register('description')}
             />
 
-            <div className="pt-3 border-t border-divider flex items-center justify-end gap-3">
+            <div className="pt-4 border-t-2 border-ink flex items-center justify-end gap-3">
               <Button
                 variant="outline"
                 size="md"
@@ -149,6 +153,7 @@ export default function CreateProjectPage() {
                 size="md"
                 type="submit"
                 loading={isSubmitting}
+                className="font-bold uppercase tracking-wider text-xs"
               >
                 Create Capstone Project
               </Button>

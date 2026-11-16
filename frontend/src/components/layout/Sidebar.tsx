@@ -37,18 +37,18 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       ];
 
   const sidebarContent = (
-    <aside className="h-full flex flex-col bg-sidebar border-r border-border w-60 select-none">
+    <aside className="h-full flex flex-col bg-ink text-paper border-r-2 border-ink w-60 select-none">
       {/* Brand Header */}
-      <div className="h-16 px-6 border-b border-border/80 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-primary text-surface flex items-center justify-center font-serif text-lg font-semibold shadow-xs">
+      <div className="h-16 px-5 border-b-2 border-paper/20 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-md bg-primary text-white border-2 border-paper flex items-center justify-center font-display text-lg font-black shadow-[2px_2px_0_0_#FFF1D6]">
             P
           </div>
           <div>
-            <span className="font-serif font-semibold text-lg text-text tracking-tight block leading-tight">
+            <span className="font-display font-black text-lg text-paper tracking-tight block leading-tight">
               ProjectHub
             </span>
-            <span className="text-[10px] uppercase tracking-wider text-text-muted font-sans font-medium block">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-paper/70 font-bold block">
               {isFaculty ? 'Faculty Portal' : 'Student Portal'}
             </span>
           </div>
@@ -56,7 +56,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <button
           type="button"
           onClick={onClose}
-          className="lg:hidden p-1 rounded-md text-text-muted hover:text-text hover:bg-divider transition-colors"
+          className="lg:hidden p-1.5 rounded-md text-paper/70 hover:text-paper hover:bg-paper/20 transition-colors"
           aria-label="Close menu"
         >
           <X className="w-5 h-5" />
@@ -64,7 +64,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -73,10 +73,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               to={item.href}
               onClick={() => onClose()}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-sans transition-colors duration-150 ${
+                `flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-sans transition-all duration-120 ${
                   isActive
-                    ? 'bg-surface text-primary font-medium shadow-xs border border-border/60'
-                    : 'text-text-secondary hover:text-text hover:bg-divider/60'
+                    ? 'bg-marigold text-ink font-bold shadow-[2px_2px_0_0_#000] border-2 border-ink'
+                    : 'text-paper/85 hover:text-paper hover:bg-paper/10 font-medium'
                 }`
               }
             >
@@ -88,12 +88,15 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       </nav>
 
       {/* Footer Info */}
-      <div className="p-3 border-t border-border/80 text-xs text-text-muted font-sans">
-        <div className="flex items-center gap-2 px-3 py-2">
+      <div className="p-3 border-t-2 border-paper/20 font-mono text-xs text-paper/70">
+        <div className="flex items-center gap-2 px-3 py-1.5">
           <BookOpen className="w-3.5 h-3.5" />
-          <span className="truncate">SRM Capstone Tracking</span>
+          <span className="truncate uppercase tracking-wider text-[11px] font-bold">Capstone Tracking</span>
         </div>
       </div>
+
+      {/* Stripe pattern strip at the bottom */}
+      <div className="h-4 w-full pattern-stripes-marigold border-t-2 border-paper/30 shrink-0" />
     </aside>
   );
 
@@ -108,11 +111,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {isOpen && (
         <div className="fixed inset-0 z-40 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-text/30 backdrop-blur-xs transition-opacity animate-fade-in"
+            className="fixed inset-0 bg-ink/70 transition-opacity animate-fade-in"
             onClick={onClose}
             aria-hidden="true"
           />
-          <div className="relative z-50 animate-slide-right h-full">
+          <div className="relative z-50 h-full">
             {sidebarContent}
           </div>
         </div>

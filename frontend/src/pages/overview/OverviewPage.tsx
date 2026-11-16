@@ -32,28 +32,36 @@ function StatusCountStrip({
 }: {
   counts: Record<ProjectStatus, number>;
 }) {
-  const statuses: { key: ProjectStatus; label: string }[] = [
-    { key: 'DRAFT', label: 'Draft' },
-    { key: 'PENDING_REVIEW', label: 'Pending Review' },
-    { key: 'CHANGES_REQUESTED', label: 'Changes Requested' },
-    { key: 'IN_PROGRESS', label: 'In Progress' },
-    { key: 'COMPLETED', label: 'Completed' },
-    { key: 'REJECTED', label: 'Rejected' },
+  const statuses: {
+    key: ProjectStatus;
+    label: string;
+    tileBg: string;
+    border: string;
+  }[] = [
+    { key: 'DRAFT', label: 'Draft', tileBg: 'bg-paper-dark', border: 'border-2 border-dashed border-ink' },
+    { key: 'PENDING_REVIEW', label: 'Pending Review', tileBg: 'bg-violet-tint', border: 'border-2 border-ink' },
+    { key: 'CHANGES_REQUESTED', label: 'Changes Requested', tileBg: 'bg-marigold-tint', border: 'border-2 border-ink' },
+    { key: 'IN_PROGRESS', label: 'In Progress', tileBg: 'bg-sky-tint', border: 'border-2 border-ink' },
+    { key: 'COMPLETED', label: 'Completed', tileBg: 'bg-lime', border: 'border-2 border-ink' },
+    { key: 'REJECTED', label: 'Rejected', tileBg: 'bg-coral', border: 'border-2 border-ink' },
   ];
 
   return (
-    <div className="bg-surface border border-border rounded-lg p-3 sm:p-4 mb-6 shadow-xs">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3 text-center">
-        {statuses.map(({ key, label }) => (
+    <div className="mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4 text-center">
+        {statuses.map(({ key, label, tileBg, border }) => (
           <div
             key={key}
-            className="p-2 sm:p-2.5 rounded-md bg-sidebar/70 border border-border/50 flex flex-col items-center justify-center"
+            className={`p-3 sm:p-4 rounded-[12px] ${tileBg} ${border} shadow-[4px_4px_0_0_#1B1410] flex flex-col items-center justify-between transition-transform duration-120 hover:-translate-y-0.5`}
           >
-            <span className="text-xs text-text-muted font-sans font-medium line-clamp-1">
+            <span className="text-xs text-ink font-mono font-bold uppercase tracking-wider line-clamp-1">
               {label}
             </span>
-            <span className="text-lg sm:text-xl font-serif font-semibold text-text tabular-nums mt-0.5">
+            <span className="text-4xl sm:text-5xl lg:text-[56px] font-display font-serif font-black text-ink tabular-nums my-1 leading-none">
               {counts[key] || 0}
+            </span>
+            <span className="text-[10px] font-mono text-ink/70 uppercase tracking-widest font-semibold">
+              PROJECTS
             </span>
           </div>
         ))}
@@ -92,62 +100,67 @@ function StudentOverview({ data }: { data: DashboardSummaryStudent }) {
       {/* 1. Active Project */}
       {data.activeProject && (
         <section aria-labelledby="active-project-heading">
-          <div className="bg-surface border border-border rounded-lg p-5 sm:p-6 shadow-xs hover:border-text-muted/40 transition-colors">
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <span className="text-xs font-sans font-medium text-text-muted uppercase tracking-wider">
-                Active Project
-              </span>
-              <StatusBadge status={data.activeProject.status} />
-            </div>
+          <div className="card-hard-static bg-white overflow-hidden">
+            {/* Marigold header band */}
+            <div className="h-4 w-full bg-marigold border-b-2 border-ink" />
 
-            <h2
-              id="active-project-heading"
-              className="font-serif text-xl sm:text-2xl font-semibold text-text mb-2 line-clamp-2"
-            >
-              <Link
-                to={`/projects/${data.activeProject.id}`}
-                className="hover:text-primary transition-colors"
-              >
-                {data.activeProject.title}
-              </Link>
-            </h2>
-
-            <p className="font-sans text-sm text-text-secondary line-clamp-2 mb-4 leading-relaxed">
-              {data.activeProject.description || 'No description provided.'}
-            </p>
-
-            <div className="mb-4">
-              <ProgressBar progress={data.activeProject.progress} />
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-divider text-xs text-text-secondary">
-              <div className="flex items-center gap-4">
-                <span>
-                  Guide:{' '}
-                  <strong className="text-text font-medium">
-                    {data.activeProject.guide.fullName}
-                  </strong>
+            <div className="p-5 sm:p-6">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm bg-marigold text-ink">
+                  ACTIVE PROJECT
                 </span>
-                <span>
-                  Team:{' '}
-                  <strong className="text-text font-medium">
-                    {data.activeProject.memberCount}/3
-                  </strong>
-                </span>
-                <span>
-                  Milestones:{' '}
-                  <strong className="text-text font-medium">
-                    {data.activeProject.milestoneCompleted}/
-                    {data.activeProject.milestoneTotal}
-                  </strong>
-                </span>
+                <StatusBadge status={data.activeProject.status} />
               </div>
-              <Link
-                to={`/projects/${data.activeProject.id}`}
-                className="text-primary font-medium flex items-center gap-1 hover:underline"
+
+              <h2
+                id="active-project-heading"
+                className="font-display font-black text-2xl sm:text-3xl text-ink mb-2 line-clamp-2 tracking-tight"
               >
-                View Project Details <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+                <Link
+                  to={`/projects/${data.activeProject.id}`}
+                  className="hover:text-primary transition-colors"
+                >
+                  {data.activeProject.title}
+                </Link>
+              </h2>
+
+              <p className="font-sans text-sm text-text-secondary line-clamp-2 mb-4 leading-relaxed">
+                {data.activeProject.description || 'No description provided.'}
+              </p>
+
+              <div className="mb-4">
+                <ProgressBar progress={data.activeProject.progress} />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t-2 border-ink text-xs text-text-secondary">
+                <div className="flex items-center gap-4 font-mono">
+                  <span>
+                    GUIDE:{' '}
+                    <strong className="text-ink font-bold font-sans">
+                      {data.activeProject.guide.fullName}
+                    </strong>
+                  </span>
+                  <span>
+                    TEAM:{' '}
+                    <strong className="text-ink font-bold">
+                      {data.activeProject.memberCount}/3
+                    </strong>
+                  </span>
+                  <span>
+                    MILESTONES:{' '}
+                    <strong className="text-ink font-bold">
+                      {data.activeProject.milestoneCompleted}/
+                      {data.activeProject.milestoneTotal}
+                    </strong>
+                  </span>
+                </div>
+                <Link
+                  to={`/projects/${data.activeProject.id}`}
+                  className="text-primary font-bold flex items-center gap-1 hover:underline font-mono uppercase tracking-wider text-xs"
+                >
+                  View Details <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -155,15 +168,20 @@ function StudentOverview({ data }: { data: DashboardSummaryStudent }) {
 
       {/* 2. Upcoming Milestones */}
       <section aria-labelledby="milestones-heading">
-        <div className="bg-surface border border-border rounded-lg p-5 shadow-xs">
+        <div className="card-hard-static bg-white p-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3
-              id="milestones-heading"
-              className="font-serif text-lg font-medium text-text flex items-center gap-2"
-            >
-              <Clock className="w-4 h-4 text-text-muted" /> Upcoming Milestones
-            </h3>
-            <span className="text-xs text-text-muted">
+            <div>
+              <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-2 bg-teal text-white">
+                UPCOMING MILESTONES
+              </span>
+              <h3
+                id="milestones-heading"
+                className="font-display font-bold text-xl text-ink flex items-center gap-2"
+              >
+                <Clock className="w-4 h-4 text-text-muted" /> Upcoming Milestones
+              </h3>
+            </div>
+            <span className="font-mono text-xs font-bold text-ink bg-paper-dark border-2 border-ink px-2 py-0.5 rounded-full">
               {data.upcomingMilestones.length} pending
             </span>
           </div>
@@ -173,24 +191,24 @@ function StudentOverview({ data }: { data: DashboardSummaryStudent }) {
               No upcoming incomplete milestones with due dates.
             </p>
           ) : (
-            <ul className="divide-y divide-divider">
+            <ul className="divide-y-2 divide-ink">
               {data.upcomingMilestones.map((m) => (
                 <li
                   key={m.id}
                   className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5"
                 >
                   <div>
-                    <span className="font-sans text-sm font-medium text-text block">
+                    <span className="font-sans text-sm font-bold text-ink block">
                       {m.title}
                     </span>
                     <Link
                       to={`/projects/${m.projectId}`}
-                      className="text-xs text-text-muted hover:text-primary transition-colors"
+                      className="text-xs text-text-muted hover:text-primary transition-colors font-mono"
                     >
                       {m.projectTitle}
                     </Link>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-text-secondary shrink-0">
+                  <div className="flex items-center gap-1.5 text-xs text-text-secondary shrink-0 font-mono">
                     <Calendar className="w-3.5 h-3.5 text-text-muted" />
                     <span>Due {formatDate(m.dueDate)}</span>
                   </div>
@@ -203,15 +221,20 @@ function StudentOverview({ data }: { data: DashboardSummaryStudent }) {
 
       {/* 3. Recent Faculty Feedback */}
       <section aria-labelledby="feedback-heading">
-        <div className="bg-surface border border-border rounded-lg p-5 shadow-xs">
+        <div className="card-hard-static bg-white p-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3
-              id="feedback-heading"
-              className="font-serif text-lg font-medium text-text flex items-center gap-2"
-            >
-              <MessageSquare className="w-4 h-4 text-text-muted" /> Recent Faculty Feedback
-            </h3>
-            <span className="text-xs text-text-muted">
+            <div>
+              <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-2 bg-sky-tint text-ink">
+                FACULTY FEEDBACK
+              </span>
+              <h3
+                id="feedback-heading"
+                className="font-display font-bold text-xl text-ink flex items-center gap-2"
+              >
+                <MessageSquare className="w-4 h-4 text-text-muted" /> Recent Faculty Feedback
+              </h3>
+            </div>
+            <span className="font-mono text-xs font-bold text-ink bg-paper-dark border-2 border-ink px-2 py-0.5 rounded-full">
               {data.recentFeedback.length} notes
             </span>
           </div>
@@ -221,19 +244,19 @@ function StudentOverview({ data }: { data: DashboardSummaryStudent }) {
               No faculty feedback received yet.
             </p>
           ) : (
-            <ul className="divide-y divide-divider">
+            <ul className="divide-y-2 divide-ink">
               {data.recentFeedback.map((fb, idx) => (
                 <li key={idx} className="py-3 space-y-1">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-text">
+                      <span className="text-xs font-bold text-ink">
                         {fb.author.fullName}
                       </span>
-                      <span className="text-[10px] font-medium uppercase px-2 py-0.5 rounded bg-sidebar text-text-secondary border border-border/60">
+                      <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-paper-dark border border-ink text-ink">
                         {fb.feedbackType.replace('_', ' ')}
                       </span>
                     </div>
-                    <span className="text-xs text-text-muted shrink-0">
+                    <span className="text-xs font-mono text-text-muted shrink-0">
                       {formatDateTime(fb.createdAt)}
                     </span>
                   </div>
@@ -242,7 +265,7 @@ function StudentOverview({ data }: { data: DashboardSummaryStudent }) {
                   </p>
                   <Link
                     to={`/projects/${fb.projectId}`}
-                    className="text-xs text-primary hover:underline inline-block mt-0.5"
+                    className="text-xs font-mono text-primary font-bold hover:underline inline-block mt-0.5 uppercase tracking-wider"
                   >
                     {fb.projectTitle} &rarr;
                   </Link>
@@ -269,22 +292,25 @@ function FacultyOverview({ data }: { data: DashboardSummaryFaculty }) {
 
       {/* 2. Pending Reviews Table */}
       <section aria-labelledby="pending-reviews-heading">
-        <div className="bg-surface border border-border rounded-lg p-5 shadow-xs">
+        <div className="card-hard-static bg-white p-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
+              <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-2 bg-violet-tint text-ink">
+                PENDING REVIEW QUEUE
+              </span>
               <h3
                 id="pending-reviews-heading"
-                className="font-serif text-lg font-medium text-text flex items-center gap-2"
+                className="font-display font-bold text-xl text-ink flex items-center gap-2"
               >
                 <Clock className="w-4 h-4 text-text-muted" /> Projects Pending Review
               </h3>
-              <p className="text-xs text-text-secondary mt-0.5">
+              <p className="text-xs text-text-secondary mt-0.5 font-sans">
                 Assigned projects awaiting your review ({data.pendingReviewsForMe} total)
               </p>
             </div>
             <Link
               to="/pending-reviews"
-              className="text-xs text-primary font-medium hover:underline flex items-center gap-1"
+              className="text-xs text-primary font-mono font-bold hover:underline flex items-center gap-1 uppercase tracking-wider"
             >
               View All <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -296,19 +322,19 @@ function FacultyOverview({ data }: { data: DashboardSummaryFaculty }) {
             </p>
           ) : (
             <div className="overflow-x-auto -mx-5 px-5">
-              <table className="w-full text-left text-sm font-sans">
+              <table className="w-full text-left text-sm font-sans border-collapse">
                 <thead>
-                  <tr className="border-b border-divider text-xs text-text-muted uppercase tracking-wider">
-                    <th className="py-2.5 font-medium">Project Title</th>
-                    <th className="py-2.5 font-medium">Lead Student</th>
-                    <th className="py-2.5 font-medium">Submitted</th>
-                    <th className="py-2.5 font-medium text-right">Action</th>
+                  <tr className="border-b-2 border-ink text-xs font-mono uppercase tracking-wider text-ink bg-paper-dark">
+                    <th className="py-2.5 px-3 font-bold">Project Title</th>
+                    <th className="py-2.5 px-3 font-bold">Lead Student</th>
+                    <th className="py-2.5 px-3 font-bold">Submitted</th>
+                    <th className="py-2.5 px-3 font-bold text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-divider">
+                <tbody className="divide-y-2 divide-ink">
                   {data.pendingReviewItems.map((p) => (
-                    <tr key={p.id} className="hover:bg-sidebar/40 transition-colors">
-                      <td className="py-3 pr-4 font-medium text-text max-w-xs truncate">
+                    <tr key={p.id} className="even:bg-paper odd:bg-white hover:bg-marigold/30 transition-colors">
+                      <td className="py-3 px-3 font-bold text-ink max-w-xs truncate font-display">
                         <Link
                           to={`/projects/${p.id}`}
                           className="hover:text-primary transition-colors"
@@ -316,13 +342,13 @@ function FacultyOverview({ data }: { data: DashboardSummaryFaculty }) {
                           {p.title}
                         </Link>
                       </td>
-                      <td className="py-3 pr-4 text-text-secondary">
+                      <td className="py-3 px-3 text-text-secondary font-medium">
                         {p.createdBy.fullName}
                       </td>
-                      <td className="py-3 pr-4 text-xs text-text-muted whitespace-nowrap">
+                      <td className="py-3 px-3 text-xs font-mono text-text-muted whitespace-nowrap">
                         {formatDateTime(p.submissionDate)}
                       </td>
-                      <td className="py-3 text-right">
+                      <td className="py-3 px-3 text-right">
                         <Link to={`/projects/${p.id}`}>
                           <Button variant="outline" size="sm">
                             Review
@@ -340,16 +366,19 @@ function FacultyOverview({ data }: { data: DashboardSummaryFaculty }) {
 
       {/* 3. Ready to Complete Projects */}
       <section aria-labelledby="ready-complete-heading">
-        <div className="bg-surface border border-border rounded-lg p-5 shadow-xs">
+        <div className="card-hard-static bg-white p-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
+              <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-2 bg-lime text-ink">
+                READY FOR SIGN-OFF
+              </span>
               <h3
                 id="ready-complete-heading"
-                className="font-serif text-lg font-medium text-text flex items-center gap-2"
+                className="font-display font-bold text-xl text-ink flex items-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4 text-primary" /> Ready for Final Sign-off
               </h3>
-              <p className="text-xs text-text-secondary mt-0.5">
+              <p className="text-xs text-text-secondary mt-0.5 font-sans">
                 Active projects where all milestones have been completed ({data.readyToComplete.length})
               </p>
             </div>
@@ -360,14 +389,14 @@ function FacultyOverview({ data }: { data: DashboardSummaryFaculty }) {
               No projects currently ready for final completion sign-off.
             </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {data.readyToComplete.map((p) => (
                 <div
                   key={p.id}
-                  className="p-4 rounded-lg bg-sidebar/50 border border-border/80 flex flex-col justify-between"
+                  className="p-4 rounded-[12px] bg-paper border-2 border-ink shadow-[3px_3px_0_0_#1B1410] flex flex-col justify-between"
                 >
                   <div>
-                    <h4 className="font-serif text-base font-semibold text-text mb-1 truncate">
+                    <h4 className="font-display text-base font-bold text-ink mb-1 truncate">
                       <Link
                         to={`/projects/${p.id}`}
                         className="hover:text-primary transition-colors"
@@ -375,12 +404,12 @@ function FacultyOverview({ data }: { data: DashboardSummaryFaculty }) {
                         {p.title}
                       </Link>
                     </h4>
-                    <p className="text-xs text-text-secondary mb-3">
-                      Lead: <span className="text-text font-medium">{p.createdBy.fullName}</span> &bull; {p.milestoneCompleted}/{p.milestoneTotal} milestones complete
+                    <p className="text-xs text-text-secondary mb-3 font-mono">
+                      Lead: <span className="text-ink font-bold font-sans">{p.createdBy.fullName}</span> &bull; {p.milestoneCompleted}/{p.milestoneTotal} milestones complete
                     </p>
                     <ProgressBar progress={100} size="sm" />
                   </div>
-                  <div className="mt-4 pt-3 border-t border-divider flex justify-end">
+                  <div className="mt-4 pt-3 border-t-2 border-ink flex justify-end">
                     <Link to={`/projects/${p.id}`}>
                       <Button variant="primary" size="sm">
                         Complete Capstone

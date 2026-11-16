@@ -59,7 +59,7 @@ export function TeamManagement({
       if (err instanceof ApiError && err.code === 'RATE_LIMITED') {
         setSearchError('Search rate limit reached. Please wait a minute and try again.');
       } else {
-        setSearchError(err.message || 'Error searching for student');
+        setSearchError('Error searching for student. Please verify the email and try again.');
       }
     } finally {
       setSearching(false);
@@ -70,13 +70,15 @@ export function TeamManagement({
     if (!searchResult) return;
     setAdding(true);
     try {
-      await api.post(`/projects/${projectId}/members`, { studentId: searchResult.id });
-      await onRefreshProject();
+      await api.post(`/projects/${projectId}/members`, {
+        studentId: searchResult.id,
+      });
       setIsAddOpen(false);
-      setSearchEmail('');
       setSearchResult(null);
+      setSearchEmail('');
+      await onRefreshProject();
     } catch (err: any) {
-      setSearchError(err.message || 'Failed to add member to team');
+      setSearchError(err.message || 'Failed to add student to project');
     } finally {
       setAdding(false);
     }
@@ -87,10 +89,10 @@ export function TeamManagement({
     setRemoving(true);
     try {
       await api.delete(`/projects/${projectId}/members/${removeTarget.studentId}`);
-      await onRefreshProject();
       setRemoveTarget(null);
+      await onRefreshProject();
     } catch (err: any) {
-      alert(err.message || 'Failed to remove member');
+      alert(err.message || 'Failed to remove team member');
     } finally {
       setRemoving(false);
     }
@@ -99,10 +101,13 @@ export function TeamManagement({
   const isFull = members.length >= 3;
 
   return (
-    <div className="bg-surface border border-border rounded-lg p-5 shadow-xs">
+    <div className="card-hard-static bg-white p-5 mb-6">
+      <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-violet-tint text-ink">
+        TEAM ROSTER
+      </span>
       <div className="flex items-center justify-between mb-3">
-        <h4 className="font-serif text-base font-semibold text-text flex items-center gap-2">
-          <Users className="w-4 h-4 text-text-muted" /> Project Team ({members.length}/3)
+        <h4 className="font-display text-lg font-bold text-ink flex items-center gap-2">
+          <Users className="w-4 h-4 text-text-muted stroke-[2.5]" /> Project Team ({members.length}/3)
         </h4>
         {canManageTeam && !isFull && (
           <Button
@@ -122,33 +127,33 @@ export function TeamManagement({
       </div>
 
       {isFull && canManageTeam && (
-        <p className="text-[11px] text-text-muted mb-3 italic">
+        <p className="text-[11px] font-mono text-text-muted mb-3 italic">
           Team has reached the maximum cap of 3 students.
         </p>
       )}
 
-      <ul className="divide-y divide-divider text-xs font-sans">
+      <ul className="divide-y-2 divide-ink text-xs font-sans">
         {members.map((member) => (
           <li
             key={member.studentId}
             className="py-2.5 flex items-center justify-between gap-2"
           >
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-medium text-text truncate">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-ink truncate">
                   {member.fullName}
                 </span>
                 <span
-                  className={`text-[10px] font-semibold px-1.5 py-0.2 rounded ${
+                  className={`font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border-2 border-ink ${
                     member.membershipRole === 'LEAD'
-                      ? 'bg-primary text-surface'
-                      : 'bg-sidebar text-text-secondary border border-border'
+                      ? 'bg-primary text-white shadow-[1px_1px_0_0_#000]'
+                      : 'bg-paper-dark text-ink'
                   }`}
                 >
                   {member.membershipRole}
                 </span>
               </div>
-              <span className="text-text-muted truncate block">
+              <span className="text-text-muted truncate block font-mono text-[11px] mt-0.5">
                 {member.email}
                 {member.registrationNumber ? ` • ${member.registrationNumber}` : ''}
               </span>
@@ -159,7 +164,7 @@ export function TeamManagement({
               <button
                 type="button"
                 onClick={() => setRemoveTarget(member)}
-                className="text-text-muted hover:text-error p-1 rounded hover:bg-error/10 transition-colors shrink-0"
+                className="text-error hover:bg-error/10 p-1.5 rounded-md border border-transparent hover:border-error transition-colors shrink-0"
                 aria-label={`Remove ${member.fullName} from team`}
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -174,10 +179,13 @@ export function TeamManagement({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text/40 backdrop-blur-xs animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 animate-fade-in"
         >
-          <div className="bg-surface border border-border rounded-lg shadow-lg max-w-md w-full p-6 text-left">
-            <h3 className="font-serif text-xl font-semibold text-text mb-2">
+          <div className="card-hard-static bg-white border-2 border-ink rounded-[12px] shadow-[7px_7px_0_0_#1B1410] max-w-md w-full p-6 text-left">
+            <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-marigold text-ink">
+              TEAM MANAGEMENT
+            </span>
+            <h3 className="font-display font-black text-2xl text-ink mb-2">
               Add Student to Team
             </h3>
             <p className="font-sans text-xs text-text-secondary mb-4 leading-relaxed">
@@ -191,7 +199,7 @@ export function TeamManagement({
                   placeholder="student@demo.projecthub.test"
                   value={searchEmail}
                   onChange={(e) => setSearchEmail(e.target.value)}
-                  className="flex-1 bg-surface text-text text-sm font-sans px-3 py-2 rounded-md border border-border focus:outline-none focus:ring-2 focus:ring-focus/30 focus:border-focus"
+                  className="flex-1 bg-white text-ink text-sm font-sans px-3.5 py-2.5 rounded-lg border-2 border-ink placeholder:text-text-muted/60 focus:outline-none focus:border-violet focus:ring-0 focus:shadow-[0_0_0_2px_#FFF1D6,0_0_0_5px_#7A4DE0]"
                   required
                 />
                 <Button
@@ -206,19 +214,19 @@ export function TeamManagement({
               </div>
 
               {searchError && (
-                <div className="p-2.5 rounded bg-error/10 border border-error/20 text-xs text-error flex items-start gap-1.5">
-                  <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                <div className="p-3 rounded-lg bg-error/10 border-2 border-error text-xs font-mono font-bold text-error flex items-start gap-1.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{searchError}</span>
                 </div>
               )}
 
               {searchResult && (
-                <div className="p-3 rounded-lg bg-sidebar border border-border flex items-center justify-between gap-3 animate-fade-in">
+                <div className="p-3 rounded-lg bg-paper border-2 border-ink shadow-[2px_2px_0_0_#1B1410] flex items-center justify-between gap-3 animate-fade-in">
                   <div className="min-w-0">
-                    <span className="font-medium text-sm text-text block truncate">
+                    <span className="font-bold text-sm text-ink block truncate">
                       {searchResult.fullName}
                     </span>
-                    <span className="text-xs text-text-secondary block truncate">
+                    <span className="font-mono text-xs text-text-secondary block truncate">
                       {searchResult.email}
                     </span>
                   </div>
@@ -235,7 +243,7 @@ export function TeamManagement({
                 </div>
               )}
 
-              <div className="pt-3 border-t border-divider flex justify-end">
+              <div className="pt-3 border-t-2 border-ink flex justify-end">
                 <Button
                   type="button"
                   variant="outline"

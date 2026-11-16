@@ -4,7 +4,7 @@ Course: 21CSE216P (Linux and Container Technologies), SRM Institute of Science a
 Capstone Project: Containerized Student Project Tracking and Management System.
 
 Stack:
-- Frontend: React 18, Vite, TypeScript, Tailwind CSS (warm editorial pastel palette, self-hosted Geist Sans and Newsreader, no CDN), React Router v6, Lucide React, React Hook Form + Zod, served by Nginx in production (port 3000 host-exposed).
+- Frontend: React 18, Vite, TypeScript, Tailwind CSS (Maximalist Editorial palette: flat saturated blocks, ink outlines, hard offset shadows, Fraunces display, Space Grotesk UI, Space Mono meta, self-hosted via npm, no CDN), React Router v6, Lucide React, React Hook Form + Zod, served by Nginx in production (port 3000 host-exposed).
 - Backend: Node LTS, Express, TypeScript, Zod, bcrypt, express-session + connect-pg-simple, express-rate-limit, REST under /api.
 - Database: PostgreSQL 16, raw pg with parameterized SQL, plain SQL migrations in backend/migrations/.
 - Tests: Vitest, supertest, React Testing Library.

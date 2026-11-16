@@ -9,31 +9,37 @@ interface StatusBadgeProps {
 
 const STATUS_CONFIG: Record<
   ProjectStatus,
-  { bgClass: string; textClass: string }
+  { bgClass: string; textClass: string; borderClass: string }
 > = {
   COMPLETED: {
-    bgClass: 'bg-sage',
-    textClass: 'text-text',
+    bgClass: 'bg-sage bg-lime',
+    textClass: 'text-ink',
+    borderClass: 'border-2 border-ink',
   },
   PENDING_REVIEW: {
-    bgClass: 'bg-lavender',
-    textClass: 'text-text',
+    bgClass: 'bg-lavender bg-violet-tint',
+    textClass: 'text-ink',
+    borderClass: 'border-2 border-ink',
   },
   IN_PROGRESS: {
-    bgClass: 'bg-blue',
-    textClass: 'text-text',
+    bgClass: 'bg-blue bg-sky-tint',
+    textClass: 'text-ink',
+    borderClass: 'border-2 border-ink',
   },
   CHANGES_REQUESTED: {
-    bgClass: 'bg-peach',
-    textClass: 'text-text',
+    bgClass: 'bg-peach bg-marigold-tint',
+    textClass: 'text-ink',
+    borderClass: 'border-2 border-ink',
   },
   REJECTED: {
-    bgClass: 'bg-error/20',
-    textClass: 'text-error',
+    bgClass: 'bg-error/20 bg-coral',
+    textClass: 'text-ink',
+    borderClass: 'border-2 border-ink',
   },
   DRAFT: {
-    bgClass: 'bg-divider',
-    textClass: 'text-text-muted',
+    bgClass: 'bg-divider bg-paper-dark',
+    textClass: 'text-ink',
+    borderClass: 'border-2 border-dashed border-ink',
   },
 };
 
@@ -45,14 +51,14 @@ export function StatusBadge({ status, isArchived, className = '' }: StatusBadgeP
     <div className={`inline-flex items-center gap-1.5 ${className}`}>
       <span
         data-testid={`badge-${status}`}
-        className={`font-sans text-xs px-2.5 py-0.5 rounded-full font-medium tracking-wide ${config.bgClass} ${config.textClass}`}
+        className={`font-mono text-xs uppercase tracking-wider px-2.5 py-0.5 rounded-full font-bold ${config.bgClass} ${config.textClass} ${config.borderClass}`}
       >
         {label}
       </span>
       {isArchived && (
         <span
           data-testid="badge-archived"
-          className="font-sans text-xs px-2 py-0.5 rounded-full font-medium tracking-wide border border-text-muted/40 text-text-muted bg-transparent"
+          className="font-mono text-xs uppercase tracking-wider px-2 py-0.5 rounded-full font-bold border-2 border-dashed border-ink text-ink bg-white"
         >
           Archived
         </span>

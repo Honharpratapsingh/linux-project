@@ -22,76 +22,76 @@ export function ProjectTable({
 }: ProjectTableProps) {
   if (projects.length === 0) {
     return (
-      <div className="bg-surface border border-border rounded-lg p-8 text-center text-sm font-sans text-text-muted">
+      <div className="card-hard-static bg-white p-8 text-center text-sm font-sans text-text-muted">
         {emptyMessage}
       </div>
     );
   }
 
   return (
-    <div className="bg-surface border border-border rounded-lg shadow-xs overflow-hidden">
+    <div className="card-hard-static bg-white overflow-hidden">
       {/* Horizontal scrolling wrapper strictly isolated to the table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm font-sans divide-y divide-divider min-w-[700px]">
-          <thead className="bg-sidebar/60 text-xs font-sans text-text-muted uppercase tracking-wider">
+        <table className="w-full text-left text-sm font-sans min-w-[700px] border-collapse">
+          <thead className="bg-ink text-paper text-xs font-mono uppercase tracking-wider border-b-2 border-ink">
             <tr>
-              <th scope="col" className="py-3 px-4 sm:px-5 font-semibold">
+              <th scope="col" className="py-3.5 px-4 sm:px-5 font-bold">
                 Title
               </th>
               {showLead && (
-                <th scope="col" className="py-3 px-4 font-semibold">
+                <th scope="col" className="py-3.5 px-4 font-bold">
                   Lead Student
                 </th>
               )}
               {showGuide && (
-                <th scope="col" className="py-3 px-4 font-semibold">
+                <th scope="col" className="py-3.5 px-4 font-bold">
                   Faculty Guide
                 </th>
               )}
-              <th scope="col" className="py-3 px-4 font-semibold">
+              <th scope="col" className="py-3.5 px-4 font-bold">
                 Status
               </th>
-              <th scope="col" className="py-3 px-4 font-semibold w-36">
+              <th scope="col" className="py-3.5 px-4 font-bold w-40">
                 Progress
               </th>
-              <th scope="col" className="py-3 px-4 font-semibold text-center w-20">
+              <th scope="col" className="py-3.5 px-4 font-bold text-center w-20">
                 Team
               </th>
-              <th scope="col" className="py-3 px-4 font-semibold">
+              <th scope="col" className="py-3.5 px-4 font-bold">
                 Updated
               </th>
-              <th scope="col" className="py-3 px-4 sm:px-5 font-semibold text-right">
+              <th scope="col" className="py-3.5 px-4 sm:px-5 font-bold text-right">
                 <span className="sr-only">Actions</span>
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-divider bg-surface">
+          <tbody className="divide-y-2 divide-ink">
             {projects.map((project) => (
               <tr
                 key={project.id}
-                className="hover:bg-sidebar/40 transition-colors duration-150 group"
+                className="even:bg-paper odd:bg-white hover:bg-marigold/30 transition-colors duration-150 group"
               >
-                <td className="py-3.5 px-4 sm:px-5 font-medium text-text max-w-xs">
+                <td className="py-3.5 px-4 sm:px-5 font-medium text-ink max-w-xs">
                   <Link
                     to={`/projects/${project.id}`}
-                    className="hover:text-primary transition-colors block line-clamp-1 font-serif text-base"
+                    className="hover:text-primary transition-colors block line-clamp-1 font-display text-base font-bold"
                     title={project.title}
                   >
                     {project.title}
                   </Link>
                   {project.description && (
-                    <span className="text-xs text-text-muted line-clamp-1 font-sans">
+                    <span className="text-xs text-text-muted line-clamp-1 font-sans mt-0.5">
                       {project.description}
                     </span>
                   )}
                 </td>
                 {showLead && (
-                  <td className="py-3.5 px-4 text-text-secondary whitespace-nowrap">
+                  <td className="py-3.5 px-4 text-text-secondary whitespace-nowrap font-medium">
                     {project.createdBy.fullName}
                   </td>
                 )}
                 {showGuide && (
-                  <td className="py-3.5 px-4 text-text-secondary whitespace-nowrap">
+                  <td className="py-3.5 px-4 text-text-secondary whitespace-nowrap font-medium">
                     {project.guide.fullName}
                   </td>
                 )}
@@ -101,25 +101,25 @@ export function ProjectTable({
                     isArchived={isArchivedView || !!project.archivedAt}
                   />
                 </td>
-                <td className="py-3.5 px-4 whitespace-nowrap">
-                  <ProgressBar progress={project.progress} size="sm" />
+                <td className="py-3.5 px-4">
+                  <ProgressBar progress={project.progress} />
                 </td>
-                <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                  <span className="inline-flex items-center gap-1 text-xs text-text-secondary">
-                    <Users className="w-3.5 h-3.5 text-text-muted" />
-                    <span>{project.memberCount}/3</span>
+                <td className="py-3.5 px-4 text-center">
+                  <span className="inline-flex items-center gap-1 text-xs font-mono font-bold bg-paper-dark border-2 border-ink px-2 py-0.5 rounded-full shadow-[1px_1px_0_0_#1B1410]">
+                    <Users className="w-3 h-3 text-ink" />
+                    {project.memberCount}
                   </span>
                 </td>
-                <td className="py-3.5 px-4 text-xs text-text-muted whitespace-nowrap">
+                <td className="py-3.5 px-4 text-xs font-mono text-text-muted whitespace-nowrap">
                   {formatDateTime(project.updatedAt)}
                 </td>
                 <td className="py-3.5 px-4 sm:px-5 text-right whitespace-nowrap">
                   <Link
                     to={`/projects/${project.id}`}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-lg border-2 border-ink bg-white shadow-[2px_2px_0_0_#1B1410] text-ink hover:bg-marigold transition-all duration-120 group-hover:border-ink"
+                    aria-label={`View project ${project.title}`}
                   >
-                    <span>View</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </td>
               </tr>

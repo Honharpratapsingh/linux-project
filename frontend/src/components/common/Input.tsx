@@ -15,29 +15,29 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-sans font-medium text-text mb-1.5"
+            className="block text-xs font-mono font-bold uppercase tracking-wider text-ink mb-1.5"
           >
             {label}
-            {rest.required && <span className="text-error ml-0.5">*</span>}
+            {rest.required && <span className="text-error ml-1">*</span>}
           </label>
         )}
         <input
           ref={ref}
           id={inputId}
-          className={`w-full bg-surface text-text text-sm font-sans px-3 py-2 rounded-md border ${
-            error ? 'border-error focus:ring-error/20' : 'border-border focus:border-focus focus:ring-focus/30'
-          } placeholder:text-text-muted/60 transition-colors duration-150 focus:outline-none focus:ring-2 disabled:bg-sidebar disabled:text-text-muted disabled:cursor-not-allowed ${className}`}
+          className={`w-full bg-white text-ink text-sm font-sans px-3.5 py-2.5 rounded-[8px] border-2 ${
+            error ? 'border-error' : 'border-ink'
+          } placeholder:text-text-muted/60 transition-all duration-120 focus:outline-none focus:border-violet focus:ring-0 focus:shadow-[0_0_0_2px_#FFF1D6,0_0_0_5px_#7A4DE0] disabled:bg-paper-dark disabled:text-text-muted disabled:cursor-not-allowed ${className}`}
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined}
           {...rest}
         />
         {error && (
-          <p id={`${inputId}-error`} className="text-xs text-error mt-1 font-sans">
+          <p id={`${inputId}-error`} className="text-xs text-error mt-1 font-mono font-medium">
             {error}
           </p>
         )}
         {helperText && !error && (
-          <p id={`${inputId}-helper`} className="text-xs text-text-muted mt-1 font-sans">
+          <p id={`${inputId}-helper`} className="text-xs text-text-muted mt-1 font-mono">
             {helperText}
           </p>
         )}

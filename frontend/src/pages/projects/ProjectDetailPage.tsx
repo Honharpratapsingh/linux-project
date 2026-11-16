@@ -41,7 +41,7 @@ import { TeamManagement } from '../../components/project/TeamManagement';
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast, success, error: toastError } = useToast();
+  const { success, error: toastError } = useToast();
 
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
@@ -78,7 +78,6 @@ export default function ProjectDetailPage() {
         api.get<{ items: Feedback[] }>(`/projects/${id}/feedback`),
         api.get<{ items: HistoryEntry[] }>(`/projects/${id}/history`),
       ]);
-
       setProject(projRes);
       setMilestones(mileRes.items);
       setFeedback(fbRes.items);
@@ -101,113 +100,58 @@ export default function ProjectDetailPage() {
     fetchProjectData();
   }, [fetchProjectData]);
 
-  // Load faculty list if user has canChangeGuide
-  useEffect(() => {
-    if (project?.permissions.canChangeGuide) {
-      api
-        .get<{ items: DirectoryUser[] }>('/faculty')
-        .then((res) => setFacultyList(res.items))
-        .catch(() => {});
-    }
-  }, [project?.permissions.canChangeGuide]);
-
-  const openEditModal = () => {
+  // Handle Edit Scope Modal opening
+  const openEditModal = async () => {
     if (!project) return;
     setEditTitle(project.title);
     setEditDesc(project.description || '');
     setEditGuideId(project.guide.id);
     setEditError(null);
+
+    // Fetch faculty list if allowed to change guide
+    if (project.permissions.canChangeGuide) {
+      try {
+        const res = await api.get<{ items: DirectoryUser[] }>('/faculty');
+        setFacultyList(res.items);
+      } catch (err) {
+        console.error('Failed to load faculty options', err);
+      }
+    }
     setIsEditOpen(true);
   };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id || !project) return;
-    if (!editTitle.trim() || editTitle.trim().length < 3) {
-      setEditError('Title must be at least 3 characters long');
-      return;
-    }
-
     setSavingEdit(true);
     setEditError(null);
     try {
-      const payload: Record<string, string> = {
+      const payload: Record<string, string | undefined> = {
         title: editTitle.trim(),
         description: editDesc.trim(),
       };
       if (project.permissions.canChangeGuide && editGuideId !== project.guide.id) {
         payload.guideId = editGuideId;
       }
-
       await api.patch(`/projects/${id}`, payload);
-      await fetchProjectData();
       setIsEditOpen(false);
-      success('Project updated successfully');
+      await fetchProjectData();
+      success('Project scope updated');
     } catch (err: any) {
-      setEditError(err.message || 'Failed to update project');
+      setEditError(err.message || 'Failed to update project details');
     } finally {
       setSavingEdit(false);
     }
   };
 
-  // Workflow actions
-  const handleWorkflowAction = async (message?: string) => {
-    if (!id || !activeDialog) return;
-    setActionLoading(true);
-    try {
-      switch (activeDialog) {
-        case 'SUBMIT':
-          await api.post(`/projects/${id}/submit`);
-          success('Project submitted for faculty review');
-          break;
-        case 'APPROVE':
-          await api.post(`/projects/${id}/approve`, { message: message || undefined });
-          success('Project approved and moved to In Progress');
-          break;
-        case 'REQUEST_CHANGES':
-          await api.post(`/projects/${id}/request-changes`, { message });
-          success('Changes requested from project team');
-          break;
-        case 'REJECT':
-          await api.post(`/projects/${id}/reject`, { message });
-          success('Project proposal rejected');
-          break;
-        case 'COMPLETE':
-          await api.post(`/projects/${id}/complete`, { message: message || undefined });
-          success('Project successfully marked as completed!');
-          break;
-        case 'ARCHIVE':
-          await api.patch(`/projects/${id}/archive`);
-          success('Project archived');
-          break;
-        case 'RESTORE':
-          await api.patch(`/projects/${id}/restore`);
-          success('Project restored from archive');
-          break;
-        case 'DELETE':
-          await api.delete(`/projects/${id}`);
-          success('Project permanently deleted');
-          navigate('/projects');
-          return;
-      }
-      setActiveDialog(null);
-      await fetchProjectData();
-    } catch (err: any) {
-      toastError(err.message || 'Action failed');
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Milestone handlers
-  const handleToggleComplete = async (m: Milestone) => {
+  // Milestone action handlers
+  const handleToggleComplete = async (milestone: Milestone) => {
     if (!id) return;
     try {
-      await api.patch(`/projects/${id}/milestones/${m.id}`, {
-        isCompleted: !m.isCompleted,
+      await api.patch(`/projects/${id}/milestones/${milestone.id}`, {
+        isCompleted: !milestone.isCompleted,
       });
       await fetchProjectData();
-      toast(m.isCompleted ? 'Milestone marked incomplete' : 'Milestone marked completed');
     } catch (err: any) {
       toastError(err.message || 'Failed to toggle milestone');
     }
@@ -217,7 +161,7 @@ export default function ProjectDetailPage() {
     if (!id) return;
     await api.post(`/projects/${id}/milestones`, data);
     await fetchProjectData();
-    success('Milestone added');
+    success('Milestone created');
   };
 
   const handleUpdateMilestone = async (
@@ -232,9 +176,62 @@ export default function ProjectDetailPage() {
 
   const handleDeleteMilestone = async (milestoneId: string) => {
     if (!id) return;
-    await api.delete(`/projects/${id}/milestones/${milestoneId}`);
-    await fetchProjectData();
-    success('Milestone deleted');
+    try {
+      await api.delete(`/projects/${id}/milestones/${milestoneId}`);
+      await fetchProjectData();
+      success('Milestone removed');
+    } catch (err: any) {
+      toastError(err.message || 'Failed to delete milestone');
+    }
+  };
+
+  // Workflow action execution
+  const handleWorkflowAction = async (message?: string) => {
+    if (!id || !activeDialog) return;
+    setActionLoading(true);
+    try {
+      switch (activeDialog) {
+        case 'SUBMIT':
+          await api.post(`/projects/${id}/submit`);
+          success('Project submitted for review');
+          break;
+        case 'APPROVE':
+          await api.post(`/projects/${id}/approve`, { message: message || undefined });
+          success('Project proposal approved');
+          break;
+        case 'REQUEST_CHANGES':
+          await api.post(`/projects/${id}/request-changes`, { message });
+          success('Revisions requested from team');
+          break;
+        case 'REJECT':
+          await api.post(`/projects/${id}/reject`, { message });
+          success('Project proposal rejected');
+          break;
+        case 'COMPLETE':
+          await api.post(`/projects/${id}/complete`, { message: message || undefined });
+          success('Capstone project successfully completed!');
+          break;
+        case 'ARCHIVE':
+          await api.patch(`/projects/${id}/archive`);
+          success('Project archived');
+          break;
+        case 'RESTORE':
+          await api.patch(`/projects/${id}/restore`);
+          success('Project restored');
+          break;
+        case 'DELETE':
+          await api.delete(`/projects/${id}`);
+          success('Project deleted permanently');
+          navigate('/projects');
+          return;
+      }
+      setActiveDialog(null);
+      await fetchProjectData();
+    } catch (err: any) {
+      toastError(err.message || 'Action failed');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   // Feedback handler
@@ -304,9 +301,13 @@ export default function ProjectDetailPage() {
         {/* LEFT / MAIN COLUMN (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Title and Scope Card */}
-          <div className="bg-surface border border-border rounded-lg p-6 sm:p-7 shadow-xs">
+          <div className="card-hard-static bg-white p-6 sm:p-7 relative">
+            <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-marigold text-ink">
+              PROJECT SCOPE
+            </span>
+
             <div className="flex items-start justify-between gap-4 mb-3">
-              <h1 className="font-serif text-2xl sm:text-3xl font-semibold text-text leading-tight">
+              <h1 className="font-display font-black text-2xl sm:text-3xl lg:text-4xl text-ink leading-tight tracking-tight">
                 {project.title}
               </h1>
               {permissions.canEdit && (
@@ -326,10 +327,10 @@ export default function ProjectDetailPage() {
               {project.description || 'No description provided.'}
             </p>
 
-            <div className="pt-4 border-t border-divider">
-              <div className="flex items-center justify-between text-xs text-text-muted mb-2">
-                <span>Milestone Progress</span>
-                <span className="font-medium text-text tabular-nums">
+            <div className="pt-4 border-t-2 border-ink">
+              <div className="flex items-center justify-between text-xs font-mono text-text-muted mb-2">
+                <span className="font-bold uppercase tracking-wider">Milestone Progress</span>
+                <span className="font-bold text-ink tabular-nums">
                   {project.milestoneCompleted} of {project.milestoneTotal} completed
                 </span>
               </div>
@@ -363,9 +364,13 @@ export default function ProjectDetailPage() {
         {/* RIGHT / SIDE COLUMN (1 col) */}
         <div className="space-y-6">
           {/* Status and Action Buttons Card */}
-          <div className="bg-surface border border-border rounded-lg p-5 shadow-xs">
+          <div className="card-hard-static bg-white p-5">
+            <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-lime text-ink">
+              WORKFLOW ACTIONS
+            </span>
+
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-sans font-medium text-text-muted uppercase tracking-wider">
+              <span className="text-xs font-mono font-bold text-text-muted uppercase tracking-wider">
                 Workflow Status
               </span>
               <StatusBadge
@@ -375,13 +380,13 @@ export default function ProjectDetailPage() {
             </div>
 
             {/* Permission-Driven Actions */}
-            <div className="space-y-2 pt-2 border-t border-divider">
+            <div className="space-y-2.5 pt-3 border-t-2 border-ink">
               {/* canSubmit: Submit / Resubmit */}
               {permissions.canSubmit && (
                 <Button
                   variant="primary"
                   size="md"
-                  className="w-full"
+                  className="w-full uppercase font-bold tracking-wider text-xs"
                   onClick={() => setActiveDialog('SUBMIT')}
                   icon={<Send className="w-4 h-4" />}
                 >
@@ -392,9 +397,9 @@ export default function ProjectDetailPage() {
               {/* canApprove: Approve */}
               {permissions.canApprove && (
                 <Button
-                  variant="primary"
+                  variant="approve"
                   size="md"
-                  className="w-full bg-sage text-text hover:bg-sage/80"
+                  className="w-full uppercase font-bold tracking-wider text-xs"
                   onClick={() => setActiveDialog('APPROVE')}
                   icon={<CheckCircle className="w-4 h-4" />}
                 >
@@ -407,9 +412,9 @@ export default function ProjectDetailPage() {
                 <Button
                   variant="outline"
                   size="md"
-                  className="w-full border-peach bg-peach/30 text-text hover:bg-peach/60"
+                  className="w-full border-marigold bg-marigold-tint/40 text-ink hover:bg-marigold-tint uppercase font-bold tracking-wider text-xs"
                   onClick={() => setActiveDialog('REQUEST_CHANGES')}
-                  icon={<AlertTriangle className="w-4 h-4" />}
+                  icon={<AlertTriangle className="w-4 h-4 text-ink" />}
                 >
                   Request Revisions
                 </Button>
@@ -418,11 +423,11 @@ export default function ProjectDetailPage() {
               {/* canReject: Reject */}
               {permissions.canReject && (
                 <Button
-                  variant="outline"
+                  variant="danger"
                   size="md"
-                  className="w-full bg-surface border border-error text-error hover:bg-error/10 hover:border-error"
+                  className="w-full uppercase font-bold tracking-wider text-xs"
                   onClick={() => setActiveDialog('REJECT')}
-                  icon={<XCircle className="w-4 h-4" />}
+                  icon={<XCircle className="w-4 h-4 text-error" />}
                 >
                   Reject Proposal
                 </Button>
@@ -434,7 +439,7 @@ export default function ProjectDetailPage() {
                   <Button
                     variant="primary"
                     size="md"
-                    className="w-full"
+                    className="w-full uppercase font-bold tracking-wider text-xs"
                     onClick={() => setActiveDialog('COMPLETE')}
                     disabled={Boolean(permissions.completionBlockedReason)}
                     icon={<Award className="w-4 h-4" />}
@@ -442,7 +447,7 @@ export default function ProjectDetailPage() {
                     Complete Project
                   </Button>
                   {completionBlockedMsg && (
-                    <p className="text-xs text-error font-medium text-center">
+                    <p className="text-xs text-error font-mono font-bold text-center">
                       {completionBlockedMsg}
                     </p>
                   )}
@@ -478,9 +483,9 @@ export default function ProjectDetailPage() {
               {/* canDelete: Delete */}
               {permissions.canDelete && (
                 <Button
-                  variant="ghost"
+                  variant="danger"
                   size="sm"
-                  className="w-full text-error hover:bg-error/10 hover:text-error"
+                  className="w-full"
                   onClick={() => setActiveDialog('DELETE')}
                   icon={<Trash2 className="w-3.5 h-3.5" />}
                 >
@@ -491,24 +496,27 @@ export default function ProjectDetailPage() {
           </div>
 
           {/* Assigned Faculty Guide */}
-          <div className="bg-surface border border-border rounded-lg p-5 shadow-xs text-xs font-sans">
+          <div className="card-hard-static bg-white p-5 text-xs font-sans">
+            <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-paper-dark text-ink">
+              FACULTY GUIDE
+            </span>
             <div className="flex items-center justify-between mb-2">
-              <span className="font-serif text-sm font-semibold text-text flex items-center gap-1.5">
-                <UserCheck className="w-4 h-4 text-text-muted" /> Faculty Guide
+              <span className="font-display text-sm font-bold text-ink flex items-center gap-1.5">
+                <UserCheck className="w-4 h-4 text-text-muted stroke-[2.5]" /> Faculty Guide
               </span>
               {permissions.canChangeGuide && (
                 <button
                   type="button"
                   onClick={openEditModal}
-                  className="text-primary hover:underline text-xs"
+                  className="text-primary font-mono font-bold hover:underline text-xs uppercase"
                 >
                   Change
                 </button>
               )}
             </div>
-            <p className="font-medium text-sm text-text">{project.guide.fullName}</p>
+            <p className="font-bold text-sm text-ink">{project.guide.fullName}</p>
             {project.guide.email && (
-              <p className="text-text-secondary">{project.guide.email}</p>
+              <p className="text-text-secondary font-mono mt-0.5">{project.guide.email}</p>
             )}
           </div>
 
@@ -521,38 +529,41 @@ export default function ProjectDetailPage() {
           />
 
           {/* Project Details / Dates */}
-          <div className="bg-surface border border-border rounded-lg p-5 shadow-xs text-xs font-sans space-y-2.5">
-            <span className="font-serif text-sm font-semibold text-text block mb-1">
+          <div className="card-hard-static bg-white p-5 text-xs font-sans space-y-2.5">
+            <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-1 bg-paper-dark text-ink">
+              METADATA
+            </span>
+            <span className="font-display text-sm font-bold text-ink block mb-1">
               Metadata
             </span>
             <div className="flex items-center justify-between">
-              <span className="text-text-muted">Lead / Creator</span>
-              <span className="font-medium text-text">{project.createdBy.fullName}</span>
+              <span className="text-text-muted font-mono text-[11px]">Lead / Creator</span>
+              <span className="font-bold text-ink">{project.createdBy.fullName}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-text-muted">Created</span>
-              <span className="text-text">{formatDate(project.createdAt)}</span>
+              <span className="text-text-muted font-mono text-[11px]">Created</span>
+              <span className="text-ink font-mono">{formatDate(project.createdAt)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-text-muted">Last Updated</span>
-              <span className="text-text">{formatDateTime(project.updatedAt)}</span>
+              <span className="text-text-muted font-mono text-[11px]">Last Updated</span>
+              <span className="text-ink font-mono">{formatDateTime(project.updatedAt)}</span>
             </div>
             {project.submissionDate && (
               <div className="flex items-center justify-between">
-                <span className="text-text-muted">Submitted</span>
-                <span className="text-text">{formatDateTime(project.submissionDate)}</span>
+                <span className="text-text-muted font-mono text-[11px]">Submitted</span>
+                <span className="text-ink font-mono">{formatDateTime(project.submissionDate)}</span>
               </div>
             )}
             {project.completedAt && (
               <div className="flex items-center justify-between">
-                <span className="text-text-muted">Completed</span>
-                <span className="text-primary font-medium">{formatDate(project.completedAt)}</span>
+                <span className="text-text-muted font-mono text-[11px]">Completed</span>
+                <span className="text-primary font-mono font-bold">{formatDate(project.completedAt)}</span>
               </div>
             )}
             {project.archivedAt && (
               <div className="flex items-center justify-between">
-                <span className="text-text-muted">Archived</span>
-                <span className="text-text-muted">{formatDateTime(project.archivedAt)}</span>
+                <span className="text-text-muted font-mono text-[11px]">Archived</span>
+                <span className="text-text-muted font-mono">{formatDateTime(project.archivedAt)}</span>
               </div>
             )}
           </div>
@@ -564,15 +575,18 @@ export default function ProjectDetailPage() {
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-text/40 backdrop-blur-xs animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/70 animate-fade-in"
         >
-          <div className="bg-surface border border-border rounded-lg shadow-lg max-w-lg w-full p-6 text-left">
-            <h3 className="font-serif text-xl font-semibold text-text mb-4">
+          <div className="card-hard-static bg-white border-2 border-ink rounded-[12px] shadow-[7px_7px_0_0_#1B1410] max-w-lg w-full p-6 text-left">
+            <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-marigold text-ink">
+              SCOPE EDITOR
+            </span>
+            <h3 className="font-display font-black text-2xl text-ink mb-4">
               Edit Project Details
             </h3>
 
             {editError && (
-              <div className="mb-4 p-2.5 rounded bg-error/10 text-xs text-error">
+              <div className="mb-4 p-3 rounded-lg bg-error/10 border-2 border-error text-xs font-mono font-bold text-error">
                 {editError}
               </div>
             )}
@@ -604,7 +618,7 @@ export default function ProjectDetailPage() {
                 onChange={(e) => setEditDesc(e.target.value)}
               />
 
-              <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-divider">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t-2 border-ink">
                 <Button
                   variant="outline"
                   size="md"
@@ -670,7 +684,6 @@ export default function ProjectDetailPage() {
         description="Rejecting the proposal marks it as REJECTED. You must provide a clear reason for the rejection."
         confirmLabel="Reject Project"
         variant="danger"
-        confirmClassName="bg-surface border border-error text-error hover:bg-error/10 hover:border-error"
         loading={actionLoading}
         showMessageInput
         requireMessage

@@ -4,12 +4,15 @@ import { Button } from '../../components/common/Button';
 
 export default function UnauthorizedPage() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6 text-center">
-      <div className="bg-surface border border-border rounded-xl p-8 sm:p-12 max-w-md w-full shadow-xs">
-        <div className="w-12 h-12 rounded-full bg-error/10 text-error flex items-center justify-center mx-auto mb-4">
-          <ShieldAlert className="w-6 h-6" />
+    <div className="min-h-screen bg-paper flex items-center justify-center p-6 text-center select-none">
+      <div className="card-hard-static bg-white p-8 sm:p-12 max-w-md w-full">
+        <div className="w-14 h-14 rounded-xl bg-error/15 border-2 border-error shadow-[3px_3px_0_0_#B3261E] text-error flex items-center justify-center mx-auto mb-5">
+          <ShieldAlert className="w-7 h-7 stroke-[2.5]" />
         </div>
-        <h1 className="font-serif text-2xl font-semibold text-text mb-2">
+        <span className="inline-block font-mono text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 border-2 border-ink shadow-[2px_2px_0_0_#1B1410] rounded-sm mb-3 bg-coral text-ink">
+          403 FORBIDDEN
+        </span>
+        <h1 className="font-display font-black text-2xl sm:text-3xl text-ink mb-2 tracking-tight">
           Access Restricted
         </h1>
         <p className="font-sans text-sm text-text-secondary mb-6 leading-relaxed">

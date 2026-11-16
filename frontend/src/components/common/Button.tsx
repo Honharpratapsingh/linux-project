@@ -2,7 +2,7 @@ import React from 'react';
 import { Loader2 } from 'lucide-react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost' | 'approve';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   icon?: React.ReactNode;
@@ -20,7 +20,7 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const baseClasses =
-    'inline-flex items-center justify-center font-sans font-medium transition-colors duration-150 rounded-md focus:outline-none focus:ring-2 focus:ring-focus/40 focus:border-focus disabled:opacity-50 disabled:cursor-not-allowed select-none';
+    'inline-flex items-center justify-center font-sans font-bold border-2 rounded-lg transition-all duration-120 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-violet focus-visible:outline-offset-2 disabled:bg-paper-dark disabled:text-text-muted disabled:border-dashed disabled:border-ink/50 disabled:shadow-none disabled:cursor-not-allowed select-none active:disabled:translate-x-0 active:disabled:translate-y-0';
 
   const sizeClasses = {
     sm: 'text-xs px-2.5 py-1.5 gap-1.5',
@@ -30,15 +30,17 @@ export function Button({
 
   const variantClasses = {
     primary:
-      'bg-primary text-surface hover:bg-primary-hover active:bg-primary-hover border border-transparent shadow-sm',
+      'bg-primary text-white border-ink shadow-[3px_3px_0_0_#1B1410] hover:bg-primary-hover active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_0_#1B1410]',
     secondary:
-      'bg-sidebar text-text hover:bg-divider border border-border/80 shadow-xs',
+      'bg-surface text-ink border-ink shadow-[3px_3px_0_0_#1B1410] hover:bg-paper-dark active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_0_#1B1410]',
     outline:
-      'bg-surface text-text hover:bg-sidebar border border-border shadow-xs',
+      'bg-surface text-ink border-ink shadow-[3px_3px_0_0_#1B1410] hover:bg-paper-dark active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_0_#1B1410]',
     danger:
-      'bg-error text-surface hover:opacity-90 border border-transparent shadow-sm',
+      'bg-surface text-error border-error shadow-[3px_3px_0_0_#1B1410] hover:bg-error/10 active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_0_#1B1410]',
     ghost:
-      'bg-transparent text-text hover:bg-sidebar/80 active:bg-sidebar border border-transparent',
+      'bg-transparent text-ink border-transparent hover:bg-ink/10 active:bg-ink/20',
+    approve:
+      'bg-lime text-ink border-ink shadow-[3px_3px_0_0_#1B1410] hover:bg-lime/90 active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_0_#1B1410]',
   };
 
   return (

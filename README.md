@@ -87,8 +87,8 @@ DEMO_SEED_PASSWORD="demo_seed_password_123" npm run seed:demo
 
 ## Phase 3 — Frontend (Real Backend API)
 
-- **Stack**: React 18, Vite, TypeScript, Tailwind CSS v3 (warm editorial pastel palette), React Router v6, Lucide React, React Hook Form + Zod, Vitest + React Testing Library.
-- **Design Tokens**: Warm editorial pastel palette (`#FAF8F3` background, `#FFFFFF` surface, `#F5F0E8` sidebar, `#554637` primary, `#292722` text, pastel status badges). Typography: Geist Sans (UI) & Newsreader (serif titles).
+- **Stack**: React 18, Vite, TypeScript, Tailwind CSS v3 (Maximalist Editorial palette), React Router v6, Lucide React, React Hook Form + Zod, Vitest + React Testing Library.
+- **Design Tokens**: Maximalist Editorial palette (tokens: ink `#1B1410`, paper `#FFF1D6`, surface `#FFFFFF`, primary `#C8381A`, marigold `#FFB627`, teal `#14A38B`, violet `#7A4DE0`, pink `#FF6FAE`, sky `#3DA5F4`, lime `#C6E03B`, coral `#FF8A80`, error `#B3261E`; status badges with 2px ink borders and hard offset shadows; CSS-only dot and stripe patterns). Typography: Fraunces display (variable 700–900), Space Grotesk (UI), Space Mono (labels & meta), self-hosted via npm.
 - **Architecture**:
   - `src/lib/api.ts`: Central fetch client communicating with the backend over `/api` (proxied via Vite). Handles CSRF memory caching, automatic single retry on `403 CSRF_INVALID`, automatic redirect on unhandled `401`, and error normalization into `ApiError`.
   - `src/features/auth/AuthContext.tsx` & `Guards.tsx`: Role-aware authentication context with `RequireAuth`, `RequireRole`, and `RedirectIfAuth` route guards.

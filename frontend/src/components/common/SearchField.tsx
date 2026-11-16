@@ -22,20 +22,20 @@ export function SearchField({
       <label htmlFor={inputId} className="sr-only">
         {label}
       </label>
-      <Search className="w-4 h-4 text-text-muted absolute left-3 pointer-events-none" />
+      <Search className="w-4 h-4 text-text-muted absolute left-3 pointer-events-none stroke-[2.5]" />
       <input
         id={inputId}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-surface text-text text-sm font-sans pl-9 pr-8 py-2 rounded-md border border-border placeholder:text-text-muted/60 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-focus/30 focus:border-focus"
+        className="w-full bg-white text-ink text-sm font-sans pl-9 pr-8 py-2 rounded-lg border-2 border-ink placeholder:text-text-muted/60 transition-all duration-120 focus:outline-none focus:border-violet focus:ring-0 focus:shadow-[0_0_0_2px_#FFF1D6,0_0_0_5px_#7A4DE0]"
       />
       {value && (
         <button
           type="button"
           onClick={() => onChange('')}
-          className="absolute right-2.5 text-text-muted hover:text-text p-0.5 rounded transition-colors"
+          className="absolute right-2.5 text-text-muted hover:text-ink p-0.5 rounded transition-colors"
           aria-label="Clear search"
         >
           <X className="w-3.5 h-3.5" />
